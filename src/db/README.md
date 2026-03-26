@@ -15,3 +15,16 @@ This folder now contains the PostgreSQL + Drizzle bootstrap used by the next imp
 - `npm run db:migrate` to apply migrations.
 - `npm run db:studio` to inspect data with Drizzle Studio.
 - `npm run db:check` to verify connection with current `DATABASE_URL`.
+
+## PostgreSQL local reminder
+
+The Docker service is initialized with:
+- `POSTGRES_USER=analysis_store`
+- `POSTGRES_PASSWORD=analysis_store`
+- `POSTGRES_DB=analysis_store`
+
+So local checks must use:
+
+```bash
+docker compose exec postgres psql -U analysis_store -d analysis_store
+```

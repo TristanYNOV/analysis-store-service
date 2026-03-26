@@ -121,6 +121,28 @@ Points clés:
 - contrainte `CHECK` sur `timelines` et `panels` pour empêcher `visibility = 'club'` avec `club_id IS NULL`.
 - stockage hybride avec colonnes relationnelles + `jsonb` (`content_json`, `payload_json`).
 
+## Vérification PostgreSQL locale (fiable)
+
+1. Vérifier les variables réellement utilisées par le service PostgreSQL:
+
+```bash
+docker compose config | sed -n '/postgres:/,/volumes:/p'
+```
+
+2. Se connecter avec **les vrais identifiants du compose** (et non `postgres/postgres`):
+
+```bash
+docker compose exec postgres psql -U analysis_store -d analysis_store
+```
+
+3. Lister les tables attendues:
+
+```sql
+\dt
+```
+
+Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_migrations` après exécution des migrations.
+
 ## Endpoint disponible à cette étape
 
 - `GET /api/health`

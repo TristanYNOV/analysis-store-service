@@ -1,0 +1,33 @@
+services:
+  analysis-store-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: analysis-store-service
+    env_file:
+      - .env.example
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: analysis-store-postgres
+    environment:
+      POSTGRES_USER: analysis_store
+      POSTGRES_PASSWORD: analysis_store
+      POSTGRES_DB: analysis_store
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U analysis_store -d analysis_store']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

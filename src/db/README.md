@@ -1,3 +1,17 @@
-# Database bootstrap notes
+# Database layer (P3)
 
-This folder is reserved for PostgreSQL and Drizzle integration in a later step.
+This folder now contains the PostgreSQL + Drizzle bootstrap used by the next implementation phases.
+
+## Files
+
+- `schema.ts`: Drizzle schema for `timelines`, `panels`, and `outbox_events`.
+- `db.service.ts`: Nest service exposing Drizzle + PostgreSQL pool.
+- `db.module.ts`: Global Nest module exporting `DbService`.
+- `scripts/check-connection.ts`: simple runtime DB connection check.
+
+## Commands
+
+- `npm run db:generate` to generate migration files from schema.
+- `npm run db:migrate` to apply migrations.
+- `npm run db:studio` to inspect data with Drizzle Studio.
+- `npm run db:check` to verify connection with current `DATABASE_URL`.

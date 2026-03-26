@@ -23,7 +23,7 @@ Contexte d'architecture:
 
 - Node.js 22 LTS
 - npm 10+
-- Docker + Docker Compose (optionnel)
+- Docker + Docker Compose
 
 ## Installation
 
@@ -31,7 +31,7 @@ Contexte d'architecture:
 npm install
 ```
 
-## Quickstart (npm)
+## Quickstart (local + PostgreSQL)
 
 1. Copier l'environnement:
 
@@ -39,13 +39,31 @@ npm install
 cp .env.example .env
 ```
 
-2. Démarrer en développement:
+2. Démarrer PostgreSQL:
+
+```bash
+docker compose up -d postgres
+```
+
+3. Appliquer les migrations:
+
+```bash
+npm run db:migrate
+```
+
+4. Vérifier la connexion DB:
+
+```bash
+npm run db:check
+```
+
+5. Démarrer l'API en développement:
 
 ```bash
 npm run start:dev
 ```
 
-3. Vérifier l'endpoint:
+6. Vérifier l'endpoint:
 
 ```bash
 curl http://localhost:3000/api/health
@@ -85,6 +103,23 @@ La configuration est validée au démarrage. Si une variable critique est absent
 - `npm run format`
 - `npm test`
 - `npm run test:e2e`
+- `npm run db:generate`
+- `npm run db:migrate`
+- `npm run db:studio`
+- `npm run db:check`
+
+## Schéma de base de données (étape actuelle)
+
+Tables implémentées:
+- `timelines`
+- `panels`
+- `outbox_events`
+
+Points clés:
+- `visibility` est un enum PostgreSQL (`private | club | public`).
+- `club_id` est nullable.
+- contrainte `CHECK` sur `timelines` et `panels` pour empêcher `visibility = 'club'` avec `club_id IS NULL`.
+- stockage hybride avec colonnes relationnelles + `jsonb` (`content_json`, `payload_json`).
 
 ## Endpoint disponible à cette étape
 
@@ -92,12 +127,12 @@ La configuration est validée au démarrage. Si une variable critique est absent
 
 ## Volontairement non implémenté à ce stade
 
-- Implémentation complète PostgreSQL/Drizzle
-- Logique métier timeline/panel/import
+- CRUD métier complet timeline/panel
 - Vérification JWT locale complète
-- Autorisation avancée
+- Autorisation avancée basée claims
 - Crypto applicative
-- Outbox
+- Consumer outbox
+- Healthcheck DB avancé
 - Postman complet
 
 ## Notes de sécurité (étape actuelle)

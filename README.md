@@ -84,12 +84,6 @@ Exemple fourni dans `.env.example`:
 - `npm test`
 - `npm run test:e2e`
 
-
-## Maintenance des dépendances
-
-- Le projet limite les dépendances de scaffolding (pas de dépendance runtime sur `@nestjs/cli` / `@nestjs/schematics`).
-- Des `overrides` npm sont définis dans `package.json` pour forcer des versions corrigées de dépendances transitives sensibles (`ajv`, `picomatch`).
-
 ## Endpoint disponible à cette étape
 
 - `GET /api/health`

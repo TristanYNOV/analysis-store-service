@@ -6,7 +6,7 @@ import { AppModule } from '../src/app.module';
 describe('Health endpoint (e2e)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -16,8 +16,10 @@ describe('Health endpoint (e2e)', () => {
     await app.init();
   });
 
-  afterEach(async () => {
-    await app.close();
+  afterAll(async () => {
+    if (app) {
+      await app.close();
+    }
   });
 
   it('/api/health (GET)', async () => {

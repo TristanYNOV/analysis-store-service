@@ -67,12 +67,14 @@ curl http://localhost:3000/api/health
 
 Exemple fourni dans `.env.example`:
 
-- `NODE_ENV`
-- `PORT`
-- `DATABASE_URL`
-- `DB_NAME`
-- `MASTER_KEY`
-- `CRYPTO_KEY_VERSION`
+- `NODE_ENV` (`development` | `test` | `production`, défaut: `development`)
+- `PORT` (défaut: `3000`)
+- `DATABASE_URL` (obligatoire sauf en `test`)
+- `DB_NAME` (défaut: `analysis_store`)
+- `MASTER_KEY` (obligatoire sauf en `test`)
+- `CRYPTO_KEY_VERSION` (obligatoire sauf en `test`)
+
+La configuration est validée au démarrage. Si une variable critique est absente ou invalide, l'application s'arrête immédiatement avec un message explicite.
 
 ## Scripts npm utiles
 

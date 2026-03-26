@@ -1,31 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AppConfig, NodeEnv } from './app-config.types';
 
 @Injectable()
 export class AppConfigService {
   constructor(private readonly configService: ConfigService) {}
 
-  get nodeEnv(): string {
-    return this.configService.get<string>('NODE_ENV', 'development');
+  private get appConfig(): AppConfig {
+    return this.configService.getOrThrow<AppConfig>('app', { infer: true });
+  }
+
+  get nodeEnv(): NodeEnv {
+    return this.appConfig.nodeEnv;
   }
 
   get port(): number {
-    return this.configService.get<number>('PORT', 3000);
+    return this.appConfig.port;
   }
 
   get databaseUrl(): string {
-    return this.configService.get<string>('DATABASE_URL', '');
+    return this.appConfig.databaseUrl;
   }
 
   get dbName(): string {
-    return this.configService.get<string>('DB_NAME', 'analysis_store');
+    return this.appConfig.dbName;
   }
 
   get masterKey(): string {
-    return this.configService.get<string>('MASTER_KEY', 'change-me');
+    return this.appConfig.masterKey;
   }
 
   get cryptoKeyVersion(): string {
-    return this.configService.get<string>('CRYPTO_KEY_VERSION', 'v1');
+    return this.appConfig.cryptoKeyVersion;
   }
 }

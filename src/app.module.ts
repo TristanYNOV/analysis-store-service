@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { appConfig } from './config/app-config.factory';
 import { AppConfigModule } from './config/app-config.module';
 import { HealthModule } from './modules/health/health.module';
 import { TimelinesModule } from './modules/timelines/timelines.module';
@@ -10,7 +11,12 @@ import { EventsModule } from './modules/events/events.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      load: [appConfig],
+      envFilePath: [`.env.${process.env.NODE_ENV ?? 'development'}`, '.env'],
+    }),
     AppConfigModule,
     HealthModule,
     TimelinesModule,

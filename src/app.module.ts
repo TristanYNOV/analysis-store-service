@@ -8,6 +8,7 @@ import { PanelsModule } from './modules/panels/panels.module';
 import { ImportsModule } from './modules/imports/imports.module';
 import { SecurityModule } from './modules/security/security.module';
 import { EventsModule } from './modules/events/events.module';
+import { DbModule } from './db/db.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { EventsModule } from './modules/events/events.module';
       envFilePath: [`.env.${process.env.NODE_ENV ?? 'development'}`, '.env'],
     }),
     AppConfigModule,
+    DbModule,
     HealthModule,
     TimelinesModule,
     PanelsModule,

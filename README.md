@@ -100,7 +100,6 @@ La configuration est validée au démarrage. Si une variable critique est absent
 - `npm run start:dev`
 - `npm run build`
 - `npm run lint`
-- `npm run format`
 - `npm test`
 - `npm run test:e2e`
 - `npm run db:generate`

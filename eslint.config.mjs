@@ -1,8 +1,6 @@
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import eslintPluginPrettier from 'eslint-plugin-prettier';
 
 export default tseslint.config(
   {
@@ -10,7 +8,6 @@ export default tseslint.config(
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  eslintConfigPrettier,
   {
     files: ['**/*.ts'],
     languageOptions: {
@@ -23,11 +20,7 @@ export default tseslint.config(
         ...globals.jest,
       },
     },
-    plugins: {
-      prettier: eslintPluginPrettier,
-    },
     rules: {
-      'prettier/prettier': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },

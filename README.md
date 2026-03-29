@@ -142,9 +142,12 @@ docker compose exec postgres psql -U analysis_store -d analysis_store
 
 Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_migrations` après exécution des migrations.
 
-## Endpoint disponible à cette étape
+## Endpoints disponibles à cette étape
 
 - `GET /api/health`
+- `GET /api/security/context` (requiert `x-auth-user-id`)
+- `POST /api/security/access-check/timeline` (hook minimal d'autorisation locale)
+- `POST /api/security/access-check/panel` (hook minimal d'autorisation locale)
 
 ## Volontairement non implémenté à ce stade
 
@@ -160,4 +163,7 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
 
 - La sécurité JWT est traitée en bordure par Traefik.
 - Ne pas faire confiance à des headers envoyés directement par le client.
-- Les headers internes (`x-auth-user-id`, `x-auth-club-ids`, `x-auth-roles`) seront exploités dans une étape ultérieure.
+- Le service lit un contexte d'identité interne depuis `x-auth-user-id`, `x-auth-club-ids`, `x-auth-roles` (CSV ou JSON array pour les listes).
+- Le JWT n'est pas validé localement ici: la validation reste en bordure gateway/Traefik.
+- Si `x-auth-user-id` est absent sur une route protégée, la réponse est `401 Unauthorized`.
+- Règles locales minimales déjà en place: timeline owner-only; panel `private` owner-only; panel `public` pour tout utilisateur authentifié; panel `club` si `clubId` ressource ∈ `x-auth-club-ids`.

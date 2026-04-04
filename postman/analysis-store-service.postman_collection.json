@@ -1,0 +1,96 @@
+{
+  "info": {
+    "name": "analysis-store-service",
+    "_postman_id": "d6b58a64-6562-4c29-bd7a-fce922f6f305",
+    "description": "Collection maintenue. Les payloads d'import sont align\u00e9s sur postman/examples/*.valid.v1.json.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Imports",
+      "item": [
+        {
+          "name": "Validate panel import (v1 example)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"schemaVersion\": \"1.0.0\",\n  \"type\": \"sequencer-panel\",\n  \"panelName\": \"Match Control Panel\",\n  \"meta\": {\n    \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n    \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n    \"exportedAtIso\": \"2026-04-04T09:00:00+00:00\",\n    \"sourceUserId\": \"user-42\",\n    \"sourceApp\": \"analysis-store-service\",\n    \"sourceAppVersion\": \"1.0.0\"\n  },\n  \"btnList\": [\n    {\n      \"id\": \"btn-event-goal\",\n      \"name\": \"Goal Event\",\n      \"type\": \"event\",\n      \"eventProps\": {\n        \"eventName\": \"Goal\",\n        \"colorHex\": \"#00FFAA\"\n      },\n      \"layout\": {\n        \"x\": 0,\n        \"y\": 0,\n        \"w\": 2,\n        \"h\": 1,\n        \"z\": 0\n      },\n      \"hotkeyNormalized\": \"Ctrl+G\",\n      \"deactivateIds\": [],\n      \"activateIds\": [\n        \"btn-stat-possession\"\n      ]\n    },\n    {\n      \"id\": \"btn-label-phase1\",\n      \"name\": \"Phase 1\",\n      \"type\": \"label\",\n      \"labelProps\": {\n        \"label\": \"Build-up\",\n        \"colorHex\": \"#112233\"\n      },\n      \"layout\": {\n        \"x\": 2,\n        \"y\": 0,\n        \"w\": 2,\n        \"h\": 1,\n        \"z\": 1\n      },\n      \"hotkeyNormalized\": null,\n      \"deactivateIds\": [\n        \"btn-event-goal\"\n      ],\n      \"activateIds\": []\n    },\n    {\n      \"id\": \"btn-stat-possession\",\n      \"name\": \"Possession\",\n      \"type\": \"stat\",\n      \"stat\": {\n        \"statName\": \"possession\",\n        \"value\": 56,\n        \"colorHex\": \"#445566\"\n      },\n      \"layout\": {\n        \"x\": 4,\n        \"y\": 0,\n        \"w\": 2,\n        \"h\": 1,\n        \"z\": 2\n      },\n      \"hotkeyNormalized\": null,\n      \"deactivateIds\": [],\n      \"activateIds\": []\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/panels/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "panels",
+                "validate"
+              ]
+            },
+            "description": "Payload synchronis\u00e9 avec postman/examples/sequencer-panel.valid.v1.json"
+          }
+        },
+        {
+          "name": "Validate timeline import (v1 example)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"schemaVersion\": \"1.0.0\",\n  \"type\": \"analysis-timeline\",\n  \"timelineName\": \"Match Timeline\",\n  \"meta\": {\n    \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n    \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n    \"exportedAtIso\": \"2026-04-04T09:00:00+00:00\",\n    \"sourceUserId\": \"user-42\",\n    \"sourceApp\": \"analysis-store-service\",\n    \"sourceAppVersion\": \"1.0.0\"\n  },\n  \"eventDefs\": [\n    {\n      \"id\": \"evt-goal\",\n      \"name\": \"Goal\",\n      \"colorHex\": \"#00FFAA\"\n    },\n    {\n      \"id\": \"evt-foul\",\n      \"name\": \"Foul\",\n      \"colorHex\": \"#AA3344\"\n    }\n  ],\n  \"labelDefs\": [\n    {\n      \"id\": \"lbl-build-up\",\n      \"name\": \"Build-up\",\n      \"colorHex\": \"#112233\"\n    }\n  ],\n  \"occurrences\": [\n    {\n      \"id\": \"occ-1\",\n      \"eventDefId\": \"evt-goal\",\n      \"labelDefId\": null,\n      \"occurredAtIso\": \"2026-04-04T08:10:00+00:00\",\n      \"durationMs\": 3200,\n      \"note\": \"Goal on counter attack\"\n    },\n    {\n      \"id\": \"occ-2\",\n      \"eventDefId\": null,\n      \"labelDefId\": \"lbl-build-up\",\n      \"occurredAtIso\": \"2026-04-04T08:12:00+00:00\",\n      \"durationMs\": 1800,\n      \"note\": null\n    }\n  ],\n  \"ui\": {\n    \"zoom\": 1.25,\n    \"showLabels\": true,\n    \"selectedOccurrenceId\": \"occ-1\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/timelines/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "timelines",
+                "validate"
+              ]
+            },
+            "description": "Payload synchronis\u00e9 avec postman/examples/analysis-timeline.valid.v1.json"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}

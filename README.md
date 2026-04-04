@@ -148,6 +148,8 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
 - `GET /api/security/context` (requiert `x-auth-user-id`)
 - `POST /api/security/access-check/timeline` (hook minimal d'autorisation locale)
 - `POST /api/security/access-check/panel` (hook minimal d'autorisation locale)
+- `POST /api/imports/timelines/validate` (validation stricte + preview, sans persistance)
+- `POST /api/imports/panels/validate` (validation stricte + preview, sans persistance)
 
 ## Volontairement non implémenté à ce stade
 
@@ -157,7 +159,23 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
 - Crypto applicative
 - Consumer outbox
 - Healthcheck DB avancé
-- Postman complet
+
+
+## Imports JSON (preview uniquement)
+
+- `analysis-store-service` est la **source de vérité** des formats JSON backend; le front s'aligne ensuite sur ces formats.
+- Les imports JSON ne sauvegardent **jamais** automatiquement en base.
+- Les formats backend v1 sont distincts et non interchangeables: `analysis-timeline` et `sequencer-panel`.
+- `schemaVersion` et `type` sont obligatoires pour les deux formats.
+- Les endpoints `POST /api/imports/timelines/validate` et `POST /api/imports/panels/validate` renvoient une preview exploitable (`valid`, `errors`, `summary`, `normalizedPayload`) sans side effect.
+
+## Workflow Postman
+
+- Le dossier `postman/` est versionné, fait partie du workflow de test local, et constitue une convention du repo.
+- Fichiers de référence:
+  - `postman/analysis-store-service.postman_collection.json`
+  - `postman/analysis-store-service.local.postman_environment.json`
+- Toute nouvelle route testable doit mettre à jour ce dossier.
 
 ## Notes de sécurité (étape actuelle)
 

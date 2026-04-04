@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "type": "analysis-timeline",
+  "timelineName": "Match Timeline",
+  "meta": {
+    "createdAtIso": "2026-04-04T08:00:00Z",
+    "updatedAtIso": "2026-04-04T08:30:00Z",
+    "exportedAtIso": "2026-04-04T09:00:00+00:00",
+    "sourceUserId": "user-42",
+    "sourceApp": "analysis-store-service",
+    "sourceAppVersion": "1.0.0"
+  },
+  "eventDefs": [
+    {
+      "id": "evt-goal",
+      "name": "Goal",
+      "colorHex": "#00FFAA"
+    },
+    {
+      "id": "evt-foul",
+      "name": "Foul",
+      "colorHex": "#AA3344"
+    }
+  ],
+  "labelDefs": [
+    {
+      "id": "lbl-build-up",
+      "name": "Build-up",
+      "colorHex": "#112233"
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "occ-1",
+      "eventDefId": "evt-goal",
+      "labelDefId": null,
+      "occurredAtIso": "2026-04-04T08:10:00+00:00",
+      "durationMs": 3200,
+      "note": "Goal on counter attack"
+    },
+    {
+      "id": "occ-2",
+      "eventDefId": null,
+      "labelDefId": "lbl-build-up",
+      "occurredAtIso": "2026-04-04T08:12:00+00:00",
+      "durationMs": 1800,
+      "note": null
+    }
+  ],
+  "ui": {
+    "zoom": 1.25,
+    "showLabels": true,
+    "selectedOccurrenceId": "occ-1"
+  }
+}

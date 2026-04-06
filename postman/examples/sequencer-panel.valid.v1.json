@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "type": "sequencer-panel",
+  "panelName": "Match Control Panel",
+  "meta": {
+    "createdAtIso": "2026-04-04T08:00:00Z",
+    "updatedAtIso": "2026-04-04T08:30:00Z",
+    "exportedAtIso": "2026-04-04T09:00:00+00:00",
+    "sourceUserId": "user-42",
+    "sourceApp": "analysis-store-service",
+    "sourceAppVersion": "1.0.0"
+  },
+  "btnList": [
+    {
+      "id": "btn-event-goal",
+      "name": "Goal Event",
+      "type": "event",
+      "eventProps": {
+        "eventName": "Goal",
+        "colorHex": "#00FFAA"
+      },
+      "layout": { "x": 0, "y": 0, "w": 2, "h": 1, "z": 0 },
+      "hotkeyNormalized": "Ctrl+G",
+      "deactivateIds": [],
+      "activateIds": ["btn-stat-possession"]
+    },
+    {
+      "id": "btn-label-phase1",
+      "name": "Phase 1",
+      "type": "label",
+      "labelProps": {
+        "label": "Build-up",
+        "colorHex": "#112233"
+      },
+      "layout": { "x": 2, "y": 0, "w": 2, "h": 1, "z": 1 },
+      "hotkeyNormalized": null,
+      "deactivateIds": ["btn-event-goal"],
+      "activateIds": []
+    },
+    {
+      "id": "btn-stat-possession",
+      "name": "Possession",
+      "type": "stat",
+      "stat": {
+        "statName": "possession",
+        "value": 56,
+        "colorHex": "#445566"
+      },
+      "layout": { "x": 4, "y": 0, "w": 2, "h": 1, "z": 2 },
+      "hotkeyNormalized": null,
+      "deactivateIds": [],
+      "activateIds": []
+    }
+  ]
+}

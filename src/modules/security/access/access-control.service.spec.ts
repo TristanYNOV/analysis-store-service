@@ -71,4 +71,30 @@ describe('AccessControlService', () => {
       }),
     ).toThrow(ForbiddenException);
   });
+
+  it('enforces owner-only writes for timeline and panel', () => {
+    expect(() =>
+      service.assertTimelineOwner(identity, {
+        ownerUserId: 'other',
+      }),
+    ).toThrow(ForbiddenException);
+
+    expect(() =>
+      service.assertPanelOwner(identity, {
+        ownerUserId: 'other',
+      }),
+    ).toThrow(ForbiddenException);
+
+    expect(() =>
+      service.assertTimelineOwner(identity, {
+        ownerUserId: 'user-1',
+      }),
+    ).not.toThrow();
+
+    expect(() =>
+      service.assertPanelOwner(identity, {
+        ownerUserId: 'user-1',
+      }),
+    ).not.toThrow();
+  });
 });

@@ -2,7 +2,7 @@
   "info": {
     "name": "analysis-store-service",
     "_postman_id": "d6b58a64-6562-4c29-bd7a-fce922f6f305",
-    "description": "Collection maintenue. Les payloads d'import sont align\u00e9s sur postman/examples/*.valid.v1.json.",
+    "description": "Collection maintenue. Les payloads d'import sont alignés sur postman/examples/*.valid.v1.json.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -52,7 +52,7 @@
                 "validate"
               ]
             },
-            "description": "Payload synchronis\u00e9 avec postman/examples/sequencer-panel.valid.v1.json"
+            "description": "Payload synchronisé avec postman/examples/sequencer-panel.valid.v1.json"
           }
         },
         {
@@ -81,7 +81,389 @@
                 "validate"
               ]
             },
-            "description": "Payload synchronis\u00e9 avec postman/examples/analysis-timeline.valid.v1.json"
+            "description": "Payload synchronisé avec postman/examples/analysis-timeline.valid.v1.json"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Timelines",
+      "item": [
+        {
+          "name": "Patch timeline by owner (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Timeline patched by owner\",\n  \"description\": \"updated by patch route\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"analysis-timeline\",\n    \"timelineName\": \"Owner Patch\",\n    \"eventDefs\": [],\n    \"labelDefs\": [],\n    \"occurrences\": [],\n    \"ui\": {\n      \"zoom\": 1,\n      \"showLabels\": true,\n      \"selectedOccurrenceId\": null\n    }\n  },\n  \"hasAnonymizedContent\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Patch timeline by non-owner (403)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Should fail\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"analysis-timeline\",\n    \"timelineName\": \"Forbidden\",\n    \"eventDefs\": [],\n    \"labelDefs\": [],\n    \"occurrences\": [],\n    \"ui\": {\n      \"zoom\": 1,\n      \"showLabels\": true,\n      \"selectedOccurrenceId\": null\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete timeline by owner (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete timeline by non-owner (403)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Panels",
+      "item": [
+        {
+          "name": "Patch panel owner private/public/club (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Panel patched by owner\",\n  \"description\": \"owner patch\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Patch Owner\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n      \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n      \"exportedAtIso\": \"2026-04-04T09:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": []\n  },\n  \"visibility\": \"club\",\n  \"clubId\": \"club-1\",\n  \"hasAnonymizedContent\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Patch panel by non-owner (403)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Should fail\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Forbidden patch\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n      \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n      \"exportedAtIso\": \"2026-04-04T09:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": []\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete panel by owner (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete panel by non-owner (403)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Copy public panel readable by non-owner (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{publicPanelId}}/copy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{publicPanelId}}",
+                "copy"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Copy club panel readable with matching clubIds (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{clubReaderUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-7"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{clubPanelId}}/copy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{clubPanelId}}",
+                "copy"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Copy club panel non-readable without matching clubIds (403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{clubPanelId}}/copy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{clubPanelId}}",
+                "copy"
+              ]
+            }
           }
         }
       ]

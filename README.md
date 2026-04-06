@@ -150,10 +150,15 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
 - `POST /api/security/access-check/panel` (hook minimal d'autorisation locale)
 - `POST /api/imports/timelines/validate` (validation stricte + preview, sans persistance)
 - `POST /api/imports/panels/validate` (validation stricte + preview, sans persistance)
+- `PATCH /api/timelines/:id` (owner only)
+- `DELETE /api/timelines/:id` (owner only, hard delete)
+- `PATCH /api/panels/:id` (owner only)
+- `DELETE /api/panels/:id` (owner only, hard delete)
+- `POST /api/panels/:id/copy` (lecture autorisée + copie privée)
 
 ## Volontairement non implémenté à ce stade
 
-- CRUD métier complet timeline/panel
+- CRUD complet (create/list/get) timeline/panel
 - Vérification JWT locale complète
 - Autorisation avancée basée claims
 - Crypto applicative
@@ -176,6 +181,30 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
   - `postman/analysis-store-service.postman_collection.json`
   - `postman/analysis-store-service.local.postman_environment.json`
 - Toute nouvelle route testable doit mettre à jour ce dossier.
+
+## Autorisation métier (règles locales)
+
+- **Timeline**
+  - lecture: owner only.
+  - update/delete: owner only.
+- **Panel**
+  - lecture:
+    - `private`: owner only.
+    - `club`: `x-auth-club-ids` contient `club_id`.
+    - `public`: tout utilisateur authentifié.
+  - update/delete: owner only, quelle que soit la visibilité.
+- La visibilité ne donne **jamais** le droit de modifier/supprimer.
+- `POST /api/panels/:id/copy` permet l’appropriation:
+  - source lisible selon les règles de lecture panel.
+  - copie avec nouvel id + owner courant.
+  - copie créée en `private` par défaut.
+  - `club_id` est conservé si présent.
+
+## Cohérence visibilité / clubId
+
+- Si `visibility = club`, alors `clubId` est obligatoire.
+- Si `visibility != club`, `clubId` peut être présent ou `null`.
+- Le backend ne force pas `clubId` à `null` pour `private/public`.
 
 ## Notes de sécurité (étape actuelle)
 

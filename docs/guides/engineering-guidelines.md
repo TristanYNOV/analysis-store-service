@@ -19,3 +19,8 @@
 - `schemaVersion` et `type` sont obligatoires pour chaque format d'import backend v1 (`analysis-timeline`, `sequencer-panel`).
 - Les imports JSON doivent rester en mode validation/preview (aucune sauvegarde automatique) tant que la persistance dédiée n'est pas explicitement implémentée.
 - Maintenir le dossier `postman/` à jour à chaque ajout/modification d'endpoint testable.
+- Séparer strictement droits de lecture et droits d'écriture:
+  - visibilité = accessibilité de lecture uniquement.
+  - update/delete = owner only.
+- En update panel/timeline, pas de patch granulaire de `content_json`: remplacer le bloc métier fourni.
+- `clubId` peut exister même quand `visibility` n'est pas `club`; seule contrainte: `visibility = club` impose `clubId`.

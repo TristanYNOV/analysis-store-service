@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "type": "sequencer-panel",
+  "panelName": "Panel joueurs - anonymisation",
+  "meta": {
+    "createdAtIso": "2026-04-11T09:00:00Z",
+    "updatedAtIso": "2026-04-11T09:30:00Z",
+    "exportedAtIso": "2026-04-11T10:00:00Z",
+    "sourceUserId": null,
+    "sourceApp": "analysis-store-service",
+    "sourceAppVersion": "1.0.0"
+  },
+  "btnList": [
+    {
+      "id": "btn-player-01",
+      "name": "Joueur titulaire A",
+      "type": "event",
+      "isAnonymized": true,
+      "eventProps": {
+        "eventName": "Passe clé - Alex Martin",
+        "colorHex": "#E63946"
+      },
+      "layout": { "x": 0, "y": 0, "w": 2, "h": 1, "z": 0 },
+      "hotkeyNormalized": null,
+      "deactivateIds": [],
+      "activateIds": ["btn-label-01"]
+    },
+    {
+      "id": "btn-label-01",
+      "name": "Profil joueur",
+      "type": "label",
+      "anonymized": true,
+      "labelProps": {
+        "label": "Nom complet: Alex Martin",
+        "colorHex": "#457B9D"
+      },
+      "layout": { "x": 2, "y": 0, "w": 2, "h": 1, "z": 1 },
+      "hotkeyNormalized": null,
+      "deactivateIds": [],
+      "activateIds": []
+    },
+    {
+      "id": "btn-tech-01",
+      "name": "Segment tactique",
+      "type": "event",
+      "eventProps": {
+        "eventName": "Pressing haut",
+        "colorHex": "#2A9D8F"
+      },
+      "layout": { "x": 4, "y": 0, "w": 2, "h": 1, "z": 2 },
+      "hotkeyNormalized": null,
+      "deactivateIds": [],
+      "activateIds": []
+    }
+  ]
+}

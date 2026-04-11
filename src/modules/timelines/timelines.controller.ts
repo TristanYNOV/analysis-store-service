@@ -23,6 +23,14 @@ export class TimelinesController {
     return this.timelinesService.list(identity);
   }
 
+  @Get(':id/export')
+  exportTimelineById(
+    @Param('id') id: string,
+    @CurrentIdentity() identity: IdentityContext,
+  ): Promise<Record<string, unknown>> {
+    return this.timelinesService.exportById(id, identity);
+  }
+
   @Get(':id')
   getTimelineById(
     @Param('id') id: string,

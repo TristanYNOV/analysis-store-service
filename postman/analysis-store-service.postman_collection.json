@@ -346,6 +346,199 @@
               ]
             }
           }
+        },
+        {
+          "name": "Export timeline owner (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export timeline non-owner (403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{readerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Anonymized timeline scenarios",
+          "item": [
+            {
+              "name": "Create anonymized timeline (owner)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{ownerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1,club-2"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/timelines",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "timelines"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Timeline joueurs anonymisée\",\n  \"description\": \"Occurrences liées à des éléments anonymisables\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"analysis-timeline\",\n    \"timelineName\": \"Timeline joueurs - anonymisation\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-11T09:05:00Z\",\n      \"updatedAtIso\": \"2026-04-11T09:35:00Z\",\n      \"exportedAtIso\": \"2026-04-11T10:05:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"eventDefs\": [\n      {\n        \"id\": \"evt-player-01\",\n        \"name\": \"Action joueur: Alex Martin\",\n        \"colorHex\": \"#E63946\",\n        \"isAnonymized\": true\n      },\n      {\n        \"id\": \"evt-tech-01\",\n        \"name\": \"Transition défensive\",\n        \"colorHex\": \"#2A9D8F\"\n      }\n    ],\n    \"labelDefs\": [\n      {\n        \"id\": \"lbl-zone-01\",\n        \"name\": \"Zone côté gauche\",\n        \"colorHex\": \"#264653\"\n      },\n      {\n        \"id\": \"lbl-player-01\",\n        \"name\": \"Joueur ciblé: Alex Martin\",\n        \"colorHex\": \"#457B9D\",\n        \"anonymized\": true\n      }\n    ],\n    \"occurrences\": [\n      {\n        \"id\": \"occ-0001\",\n        \"eventDefId\": \"evt-player-01\",\n        \"labelDefId\": \"lbl-player-01\",\n        \"occurredAtIso\": \"2026-04-11T09:10:00+00:00\",\n        \"durationMs\": 2500,\n        \"note\": \"Alex Martin réalise une passe en profondeur\"\n      },\n      {\n        \"id\": \"occ-0002\",\n        \"eventDefId\": \"evt-tech-01\",\n        \"labelDefId\": \"lbl-zone-01\",\n        \"occurredAtIso\": \"2026-04-11T09:13:00+00:00\",\n        \"durationMs\": 1800,\n        \"note\": \"Bloc équipe bien positionné\"\n      }\n    ],\n    \"ui\": {\n      \"zoom\": 1,\n      \"showLabels\": true,\n      \"selectedOccurrenceId\": \"occ-0001\"\n    }\n  },\n  \"hasAnonymizedContent\": true\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                      "const body = pm.response.json();",
+                      "pm.test('timeline id exists', function () { pm.expect(body.id).to.be.a('string').and.not.empty; });",
+                      "pm.collectionVariables.set('anonymizedTimelineId', body.id);",
+                      "pm.environment.set('anonymizedTimelineId', body.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get anonymized timeline by id (owner)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{ownerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1,club-2"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/timelines/{{anonymizedTimelineId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "timelines",
+                    "{{anonymizedTimelineId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Export anonymized timeline (owner)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{ownerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1,club-2"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/timelines/{{anonymizedTimelineId}}/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "timelines",
+                    "{{anonymizedTimelineId}}",
+                    "export"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Export anonymized timeline (non-owner forbidden)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{readerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/timelines/{{anonymizedTimelineId}}/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "timelines",
+                    "{{anonymizedTimelineId}}",
+                    "export"
+                  ]
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -847,6 +1040,281 @@
               ]
             }
           }
+        },
+        {
+          "name": "Export panel owner (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelPublicId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelPublicId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export panel non-owner authorized (redacted)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{readerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelPublicId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelPublicId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get panel non-owner authorized (redacted)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{readerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelPublicId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelPublicId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export panel forbidden (403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{outsiderUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelClubId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelClubId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Anonymized panel scenarios",
+          "item": [
+            {
+              "name": "Create anonymized panel (owner)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{ownerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1,club-2"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/panels",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "panels"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Panel joueurs anonymisé\",\n  \"description\": \"Données métier sensibles sur des joueurs, IDs techniques non sensibles\",\n  \"visibility\": \"public\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Panel joueurs - anonymisation\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-11T09:00:00Z\",\n      \"updatedAtIso\": \"2026-04-11T09:30:00Z\",\n      \"exportedAtIso\": \"2026-04-11T10:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": [\n      {\n        \"id\": \"btn-player-01\",\n        \"name\": \"Joueur titulaire A\",\n        \"type\": \"event\",\n        \"isAnonymized\": true,\n        \"eventProps\": {\n          \"eventName\": \"Passe clé - Alex Martin\",\n          \"colorHex\": \"#E63946\"\n        },\n        \"layout\": {\n          \"x\": 0,\n          \"y\": 0,\n          \"w\": 2,\n          \"h\": 1,\n          \"z\": 0\n        },\n        \"hotkeyNormalized\": null,\n        \"deactivateIds\": [],\n        \"activateIds\": [\n          \"btn-label-01\"\n        ]\n      },\n      {\n        \"id\": \"btn-label-01\",\n        \"name\": \"Profil joueur\",\n        \"type\": \"label\",\n        \"anonymized\": true,\n        \"labelProps\": {\n          \"label\": \"Nom complet: Alex Martin\",\n          \"colorHex\": \"#457B9D\"\n        },\n        \"layout\": {\n          \"x\": 2,\n          \"y\": 0,\n          \"w\": 2,\n          \"h\": 1,\n          \"z\": 1\n        },\n        \"hotkeyNormalized\": null,\n        \"deactivateIds\": [],\n        \"activateIds\": []\n      },\n      {\n        \"id\": \"btn-tech-01\",\n        \"name\": \"Segment tactique\",\n        \"type\": \"event\",\n        \"eventProps\": {\n          \"eventName\": \"Pressing haut\",\n          \"colorHex\": \"#2A9D8F\"\n        },\n        \"layout\": {\n          \"x\": 4,\n          \"y\": 0,\n          \"w\": 2,\n          \"h\": 1,\n          \"z\": 2\n        },\n        \"hotkeyNormalized\": null,\n        \"deactivateIds\": [],\n        \"activateIds\": []\n      }\n    ]\n  },\n  \"hasAnonymizedContent\": true\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                      "const body = pm.response.json();",
+                      "pm.test('panel id exists', function () { pm.expect(body.id).to.be.a('string').and.not.empty; });",
+                      "pm.collectionVariables.set('anonymizedPanelId', body.id);",
+                      "pm.environment.set('anonymizedPanelId', body.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get anonymized panel by id (owner)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{ownerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1,club-2"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/panels/{{anonymizedPanelId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "panels",
+                    "{{anonymizedPanelId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get anonymized panel by id (reader redacted)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{readerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/panels/{{anonymizedPanelId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "panels",
+                    "{{anonymizedPanelId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Export anonymized panel (owner)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{ownerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1,club-2"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/panels/{{anonymizedPanelId}}/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "panels",
+                    "{{anonymizedPanelId}}",
+                    "export"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Export anonymized panel (reader redacted)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-auth-user-id",
+                    "value": "{{readerUserId}}"
+                  },
+                  {
+                    "key": "x-auth-club-ids",
+                    "value": "club-1"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/panels/{{anonymizedPanelId}}/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "panels",
+                    "{{anonymizedPanelId}}",
+                    "export"
+                  ]
+                }
+              }
+            }
+          ]
         }
       ]
     }
@@ -855,6 +1323,14 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:3000"
+    },
+    {
+      "key": "anonymizedPanelId",
+      "value": ""
+    },
+    {
+      "key": "anonymizedTimelineId",
+      "value": ""
     }
   ]
 }

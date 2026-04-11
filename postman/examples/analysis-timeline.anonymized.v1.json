@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "type": "analysis-timeline",
+  "timelineName": "Timeline joueurs - anonymisation",
+  "meta": {
+    "createdAtIso": "2026-04-11T09:05:00Z",
+    "updatedAtIso": "2026-04-11T09:35:00Z",
+    "exportedAtIso": "2026-04-11T10:05:00Z",
+    "sourceUserId": null,
+    "sourceApp": "analysis-store-service",
+    "sourceAppVersion": "1.0.0"
+  },
+  "eventDefs": [
+    {
+      "id": "evt-player-01",
+      "name": "Action joueur: Alex Martin",
+      "colorHex": "#E63946",
+      "isAnonymized": true
+    },
+    {
+      "id": "evt-tech-01",
+      "name": "Transition défensive",
+      "colorHex": "#2A9D8F"
+    }
+  ],
+  "labelDefs": [
+    {
+      "id": "lbl-zone-01",
+      "name": "Zone côté gauche",
+      "colorHex": "#264653"
+    },
+    {
+      "id": "lbl-player-01",
+      "name": "Joueur ciblé: Alex Martin",
+      "colorHex": "#457B9D",
+      "anonymized": true
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "occ-0001",
+      "eventDefId": "evt-player-01",
+      "labelDefId": "lbl-player-01",
+      "occurredAtIso": "2026-04-11T09:10:00+00:00",
+      "durationMs": 2500,
+      "note": "Alex Martin réalise une passe en profondeur"
+    },
+    {
+      "id": "occ-0002",
+      "eventDefId": "evt-tech-01",
+      "labelDefId": "lbl-zone-01",
+      "occurredAtIso": "2026-04-11T09:13:00+00:00",
+      "durationMs": 1800,
+      "note": "Bloc équipe bien positionné"
+    }
+  ],
+  "ui": {
+    "zoom": 1,
+    "showLabels": true,
+    "selectedOccurrenceId": "occ-0001"
+  }
+}

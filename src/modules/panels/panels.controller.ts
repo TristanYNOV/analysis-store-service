@@ -23,6 +23,14 @@ export class PanelsController {
     return this.panelsService.list(identity);
   }
 
+  @Get(':id/export')
+  exportPanelById(
+    @Param('id') id: string,
+    @CurrentIdentity() identity: IdentityContext,
+  ): Promise<Record<string, unknown>> {
+    return this.panelsService.exportById(id, identity);
+  }
+
   @Get(':id')
   getPanelById(
     @Param('id') id: string,

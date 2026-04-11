@@ -152,12 +152,14 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
 - `POST /api/imports/panels/validate` (validation stricte + preview, sans persistance)
 - `POST /api/timelines` (owner = appelant, visibilité forcée `private`)
 - `GET /api/timelines` (owner only)
-- `GET /api/timelines/:id` (owner only)
+- `GET /api/timelines/:id` (owner only, vue complète)
+- `GET /api/timelines/:id/export` (owner only, JSON backend v1 complet)
 - `PATCH /api/timelines/:id` (owner only)
 - `DELETE /api/timelines/:id` (owner only, hard delete)
 - `POST /api/panels` (visibilité par défaut `private`)
 - `GET /api/panels` (filtré selon règles de lecture)
-- `GET /api/panels/:id` (règles private/public/club)
+- `GET /api/panels/:id` (règles private/public/club, redaction pour lecteur non-owner si contenu anonymisé)
+- `GET /api/panels/:id/export` (mêmes règles que la lecture; owner = complet, non-owner autorisé = redacted)
 - `PATCH /api/panels/:id` (owner only)
 - `DELETE /api/panels/:id` (owner only, hard delete)
 - `POST /api/panels/:id/copy` (lecture autorisée + copie privée)
@@ -179,6 +181,17 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
 - Les formats backend v1 sont distincts et non interchangeables: `analysis-timeline` et `sequencer-panel`.
 - `schemaVersion` et `type` sont obligatoires pour les deux formats.
 - Les endpoints `POST /api/imports/timelines/validate` et `POST /api/imports/panels/validate` renvoient une preview exploitable (`valid`, `errors`, `summary`, `normalizedPayload`) sans side effect.
+
+
+## Vues métier: complète vs redacted
+
+- Le backend produit deux vues d'une ressource:
+  - **vue complète** pour le propriétaire.
+  - **vue redacted** pour un lecteur autorisé non propriétaire.
+- La redaction est pilotée côté backend sur le contenu métier marqué anonymisé (`hasAnonymizedContent` + flags objets type `isAnonymized`/`anonymized`/`anonymizedFlag`).
+- La structure JSON backend v1 est conservée (pas d'objet cassé), seules certaines valeurs sensibles sont masquées.
+- Pour les timelines, la logique de redaction est préparée mais non exposée aux non-propriétaires à ce stade (timeline strictement owner-only).
+- Les routes de lecture et d'export réutilisent la même politique de vue/redaction pour éviter toute divergence.
 
 ## Workflow Postman
 

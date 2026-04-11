@@ -1,113 +1,103 @@
 import { Injectable } from '@nestjs/common';
 
-const REDACTED_TEXT = '[redacted]';
-
-type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-
 @Injectable()
 export class RedactionService {
   redactPanelContent(contentJson: Record<string, unknown>): Record<string, unknown> {
-    return this.redactValue(contentJson, false) as Record<string, unknown>;
-  }
+    const copy = this.deepClone(contentJson);
 
-  redactTimelineContent(contentJson: Record<string, unknown>): Record<string, unknown> {
-    return this.redactValue(contentJson, false) as Record<string, unknown>;
-  }
-
-  private redactValue(value: unknown, parentAnonymized: boolean): unknown {
-    if (Array.isArray(value)) {
-      return value.map((entry) => this.redactValue(entry, parentAnonymized));
+    if (!this.isRecord(copy) || !Array.isArray(copy.btnList)) {
+      return copy;
     }
 
-    if (!this.isRecord(value)) {
-      return value;
-    }
+    const counters = {
+      event: 0,
+      label: 0,
+      stat: 0,
+    };
 
-    const isAnonymized = parentAnonymized || this.isMarkedAnonymized(value);
-
-    const copy: Record<string, unknown> = {};
-
-    for (const [key, child] of Object.entries(value)) {
-      if (isAnonymized && this.isSensitiveLeafKey(key) && !this.isRecord(child) && !Array.isArray(child)) {
-        copy[key] = this.redactedLeafValue(child);
-        continue;
+    copy.btnList = copy.btnList.map((button) => {
+      if (!this.isRecord(button) || !this.isButtonMarkedAnonymized(button)) {
+        return button;
       }
 
-      copy[key] = this.redactValue(child, isAnonymized);
-    }
+      const type = this.resolveButtonType(button.type);
+      if (!type) {
+        return button;
+      }
 
-    if (isAnonymized && typeof copy.type === 'string') {
-      this.applyPanelButtonTypeRedaction(copy);
-    }
+      counters[type] += 1;
+      const alias = `${this.aliasPrefix(type)} ${counters[type]}`;
+
+      return this.pseudonymizeButton(button, type, alias);
+    });
 
     return copy;
   }
 
-  private applyPanelButtonTypeRedaction(button: Record<string, unknown>): void {
-    if (typeof button.name === 'string') {
-      button.name = REDACTED_TEXT;
-    }
-
-    if (button.type === 'event' && this.isRecord(button.eventProps)) {
-      button.eventProps = {
-        ...button.eventProps,
-        eventName: REDACTED_TEXT,
-        colorHex: null,
-      };
-      return;
-    }
-
-    if (button.type === 'label' && this.isRecord(button.labelProps)) {
-      button.labelProps = {
-        ...button.labelProps,
-        label: REDACTED_TEXT,
-        colorHex: null,
-      };
-      return;
-    }
-
-    if (button.type === 'stat' && this.isRecord(button.stat)) {
-      button.stat = {
-        ...button.stat,
-        statName: REDACTED_TEXT,
-        value: null,
-        colorHex: null,
-      };
-    }
+  redactTimelineContent(contentJson: Record<string, unknown>): Record<string, unknown> {
+    return this.deepClone(contentJson);
   }
 
-  private redactedLeafValue(value: unknown): unknown {
-    if (typeof value === 'string') {
-      return REDACTED_TEXT;
+  private pseudonymizeButton(
+    button: Record<string, unknown>,
+    type: 'event' | 'label' | 'stat',
+    alias: string
+  ): Record<string, unknown> {
+    const copy = { ...button };
+
+    if (typeof copy.name === 'string') {
+      copy.name = alias;
     }
 
-    if (typeof value === 'number') {
-      return null;
+    if (type === 'event' && this.isRecord(copy.eventProps)) {
+      copy.eventProps = {
+        ...copy.eventProps,
+        eventName: alias,
+      };
+    }
+
+    if (type === 'label' && this.isRecord(copy.labelProps)) {
+      copy.labelProps = {
+        ...copy.labelProps,
+        label: alias,
+      };
+    }
+
+    if (type === 'stat' && this.isRecord(copy.stat)) {
+      copy.stat = {
+        ...copy.stat,
+        statName: alias,
+      };
+    }
+    return copy;
+  }
+
+  private aliasPrefix(type: 'event' | 'label' | 'stat'): string {
+    if (type === 'event') {
+      return 'Event anonymized';
+    }
+
+    if (type === 'label') {
+      return 'Label anonymized';
+    }
+
+    return 'Stat anonymized';
+  }
+
+  private resolveButtonType(value: unknown): 'event' | 'label' | 'stat' | null {
+    if (value === 'event' || value === 'label' || value === 'stat') {
+      return value;
     }
 
     return null;
   }
 
-  private isMarkedAnonymized(value: Record<string, unknown>): boolean {
-    const markerKeys = ['isAnonymized', 'anonymized', 'anonymizedFlag'];
-
-    return markerKeys.some((key) => value[key] === true);
+  private isButtonMarkedAnonymized(value: Record<string, unknown>): boolean {
+    return value.isAnonymized === true || value.anonymized === true || value.anonymizedFlag === true;
   }
 
-  private isSensitiveLeafKey(key: string): boolean {
-    return [
-      'name',
-      'eventName',
-      'label',
-      'statName',
-      'value',
-      'colorHex',
-      'note',
-      'sourceUserId',
-    ].includes(key);
+  private deepClone(value: Record<string, unknown>): Record<string, unknown> {
+    return JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {

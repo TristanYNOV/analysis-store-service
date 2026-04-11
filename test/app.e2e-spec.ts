@@ -403,14 +403,21 @@ describe('Panels and timelines redacted reads/exports (e2e)', () => {
 
     expect(nonOwnerPublicExport.body).toEqual(nonOwnerPublicGet.body.contentJson);
     const firstButton = nonOwnerPublicExport.body.btnList[0] as Record<string, unknown>;
-    expect((firstButton.eventProps as Record<string, unknown>).eventName).toBe('[redacted]');
+    expect((firstButton.eventProps as Record<string, unknown>).eventName).toBe('Event anonymized 1');
+    expect(nonOwnerPublicExport.body.panelName).toBe('Sensitive panel');
 
     const nonOwnerClubExport = await request(app.getHttpServer())
       .get(`/api/panels/${clubPanelId}/export`)
       .set(panelReaderHeaders)
       .expect(200);
     expect((nonOwnerClubExport.body.btnList[0].eventProps as Record<string, unknown>).eventName).toBe(
-      '[redacted]',
+      'Event anonymized 1',
+    );
+    expect((nonOwnerClubExport.body.btnList[1].labelProps as Record<string, unknown>).label).toBe(
+      'Label anonymized 1',
+    );
+    expect((nonOwnerClubExport.body.btnList[2].stat as Record<string, unknown>).statName).toBe(
+      'Stat anonymized 1',
     );
 
     await request(app.getHttpServer())

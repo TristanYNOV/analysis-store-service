@@ -205,3 +205,256 @@ describe('Health and imports endpoints (e2e)', () => {
     expect(executeSpy).not.toHaveBeenCalled();
   });
 });
+
+describe('Panels and timelines redacted reads/exports (e2e)', () => {
+  let app: INestApplication;
+
+  const ownerHeaders = {
+    'x-auth-user-id': 'user-owner',
+    'x-auth-club-ids': 'club-1,club-2',
+  };
+
+  const panelReaderHeaders = {
+    'x-auth-user-id': 'user-reader',
+    'x-auth-club-ids': 'club-1',
+  };
+
+  const externalHeaders = {
+    'x-auth-user-id': 'user-external',
+    'x-auth-club-ids': 'club-9',
+  };
+
+  const redactedPanelPayload = {
+    schemaVersion: '1.0.0',
+    type: 'sequencer-panel',
+    panelName: 'Sensitive panel',
+    meta: {
+      createdAtIso: '2026-04-04T08:00:00Z',
+      updatedAtIso: '2026-04-04T08:30:00Z',
+      exportedAtIso: '2026-04-04T09:00:00+00:00',
+      sourceUserId: null,
+      sourceApp: 'analysis-store-service',
+      sourceAppVersion: '1.0.0',
+    },
+    btnList: [
+      {
+        id: 'btn-event',
+        name: 'Goal',
+        type: 'event',
+        isAnonymized: true,
+        eventProps: { eventName: 'Goal', colorHex: '#00FFAA' },
+        layout: { x: 0, y: 0, w: 2, h: 1, z: 0 },
+        hotkeyNormalized: null,
+        deactivateIds: [],
+        activateIds: [],
+      },
+      {
+        id: 'btn-label',
+        name: 'Phase',
+        type: 'label',
+        anonymized: true,
+        labelProps: { label: 'Phase 1', colorHex: '#112233' },
+        layout: { x: 2, y: 0, w: 2, h: 1, z: 1 },
+        hotkeyNormalized: null,
+        deactivateIds: [],
+        activateIds: [],
+      },
+      {
+        id: 'btn-stat',
+        name: 'Possession',
+        type: 'stat',
+        anonymizedFlag: true,
+        stat: { statName: 'possession', value: 55, colorHex: '#445566' },
+        layout: { x: 4, y: 0, w: 2, h: 1, z: 2 },
+        hotkeyNormalized: null,
+        deactivateIds: [],
+        activateIds: [],
+      },
+    ],
+  };
+
+  const timelinePayload = {
+    schemaVersion: '1.0.0',
+    type: 'analysis-timeline',
+    timelineName: 'Owner timeline',
+    meta: {
+      createdAtIso: '2026-04-04T08:00:00Z',
+      updatedAtIso: '2026-04-04T08:30:00Z',
+      exportedAtIso: '2026-04-04T09:00:00+00:00',
+      sourceUserId: null,
+      sourceApp: 'analysis-store-service',
+      sourceAppVersion: '1.0.0',
+    },
+    eventDefs: [{ id: 'evt-1', name: 'Goal', colorHex: '#00FFAA', isAnonymized: true }],
+    labelDefs: [{ id: 'lbl-1', name: 'Phase', colorHex: '#112233' }],
+    occurrences: [
+      {
+        id: 'occ-1',
+        eventDefId: 'evt-1',
+        labelDefId: null,
+        occurredAtIso: '2026-04-04T08:10:00+00:00',
+        durationMs: 3000,
+        note: 'Visible for owner only',
+      },
+    ],
+    ui: { zoom: 1, showLabels: true, selectedOccurrenceId: 'occ-1' },
+  };
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    app.setGlobalPrefix('api');
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('export timeline by owner succeeds and non-owner is forbidden', async () => {
+    const createdTimeline = await request(app.getHttpServer())
+      .post('/api/timelines')
+      .set(ownerHeaders)
+      .send({
+        title: 'Timeline export owner',
+        contentJson: timelinePayload,
+        hasAnonymizedContent: true,
+      })
+      .expect(201);
+
+    const timelineId = createdTimeline.body.id as string;
+
+    const ownerExport = await request(app.getHttpServer())
+      .get(`/api/timelines/${timelineId}/export`)
+      .set(ownerHeaders)
+      .expect(200);
+
+    expect(ownerExport.body).toEqual(timelinePayload);
+
+    await request(app.getHttpServer())
+      .get(`/api/timelines/${timelineId}/export`)
+      .set(panelReaderHeaders)
+      .expect(403);
+  });
+
+  it('panel exports follow access rules and redact for authorized non-owner readers', async () => {
+    const privatePanel = await request(app.getHttpServer())
+      .post('/api/panels')
+      .set(ownerHeaders)
+      .send({
+        title: 'Private panel',
+        visibility: 'private',
+        contentJson: redactedPanelPayload,
+        hasAnonymizedContent: true,
+      })
+      .expect(201);
+
+    const publicPanel = await request(app.getHttpServer())
+      .post('/api/panels')
+      .set(ownerHeaders)
+      .send({
+        title: 'Public panel',
+        visibility: 'public',
+        contentJson: redactedPanelPayload,
+        hasAnonymizedContent: true,
+      })
+      .expect(201);
+
+    const clubPanel = await request(app.getHttpServer())
+      .post('/api/panels')
+      .set(ownerHeaders)
+      .send({
+        title: 'Club panel',
+        visibility: 'club',
+        clubId: 'club-1',
+        contentJson: redactedPanelPayload,
+        hasAnonymizedContent: true,
+      })
+      .expect(201);
+
+    const privatePanelId = privatePanel.body.id as string;
+    const publicPanelId = publicPanel.body.id as string;
+    const clubPanelId = clubPanel.body.id as string;
+
+    const ownerPrivateExport = await request(app.getHttpServer())
+      .get(`/api/panels/${privatePanelId}/export`)
+      .set(ownerHeaders)
+      .expect(200);
+    expect(ownerPrivateExport.body).toEqual(redactedPanelPayload);
+
+    const ownerPublicExport = await request(app.getHttpServer())
+      .get(`/api/panels/${publicPanelId}/export`)
+      .set(ownerHeaders)
+      .expect(200);
+    expect(ownerPublicExport.body).toEqual(redactedPanelPayload);
+
+    const nonOwnerPublicExport = await request(app.getHttpServer())
+      .get(`/api/panels/${publicPanelId}/export`)
+      .set(panelReaderHeaders)
+      .expect(200);
+
+    const nonOwnerPublicGet = await request(app.getHttpServer())
+      .get(`/api/panels/${publicPanelId}`)
+      .set(panelReaderHeaders)
+      .expect(200);
+
+    expect(nonOwnerPublicExport.body).toEqual(nonOwnerPublicGet.body.contentJson);
+    const firstButton = nonOwnerPublicExport.body.btnList[0] as Record<string, unknown>;
+    expect((firstButton.eventProps as Record<string, unknown>).eventName).toBe('[redacted]');
+
+    const nonOwnerClubExport = await request(app.getHttpServer())
+      .get(`/api/panels/${clubPanelId}/export`)
+      .set(panelReaderHeaders)
+      .expect(200);
+    expect((nonOwnerClubExport.body.btnList[0].eventProps as Record<string, unknown>).eventName).toBe(
+      '[redacted]',
+    );
+
+    await request(app.getHttpServer())
+      .get(`/api/panels/${clubPanelId}/export`)
+      .set(externalHeaders)
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .get(`/api/panels/${privatePanelId}/export`)
+      .set(externalHeaders)
+      .expect(403);
+  });
+
+  it('panel export keeps backend v1 structure valid and does not persist writes', async () => {
+    const createdPanel = await request(app.getHttpServer())
+      .post('/api/panels')
+      .set(ownerHeaders)
+      .send({
+        title: 'Public panel for validation',
+        visibility: 'public',
+        contentJson: redactedPanelPayload,
+        hasAnonymizedContent: true,
+      })
+      .expect(201);
+
+    const panelId = createdPanel.body.id as string;
+
+    const beforeRead = await request(app.getHttpServer())
+      .get(`/api/panels/${panelId}`)
+      .set(ownerHeaders)
+      .expect(200);
+
+    const exported = await request(app.getHttpServer())
+      .get(`/api/panels/${panelId}/export`)
+      .set(panelReaderHeaders)
+      .expect(200);
+
+    await request(app.getHttpServer()).post('/api/imports/panels/validate').send(exported.body).expect(201);
+
+    const afterRead = await request(app.getHttpServer())
+      .get(`/api/panels/${panelId}`)
+      .set(ownerHeaders)
+      .expect(200);
+
+    expect(beforeRead.body.updatedAt).toBe(afterRead.body.updatedAt);
+  });
+});

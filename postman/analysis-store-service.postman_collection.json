@@ -346,6 +346,62 @@
               ]
             }
           }
+        },
+        {
+          "name": "Export timeline owner (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export timeline non-owner (403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{readerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}",
+                "export"
+              ]
+            }
+          }
         }
       ]
     },
@@ -844,6 +900,117 @@
                 "panels",
                 "{{clubPanelId}}",
                 "copy"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export panel owner (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelPublicId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelPublicId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export panel non-owner authorized (redacted)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{readerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelPublicId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelPublicId}}",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get panel non-owner authorized (redacted)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{readerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelPublicId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelPublicId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export panel forbidden (403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{outsiderUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelClubId}}/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelClubId}}",
+                "export"
               ]
             }
           }

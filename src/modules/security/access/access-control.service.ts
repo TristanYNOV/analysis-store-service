@@ -10,12 +10,16 @@ export class AccessControlService {
   }
 
   canAccessPanel(identity: IdentityContext, resource: PanelAccessResource): boolean {
+    if (identity.userId === resource.ownerId) {
+      return true;
+    }
+
     if (resource.visibility === RESOURCE_VISIBILITY.public) {
       return true;
     }
 
     if (resource.visibility === RESOURCE_VISIBILITY.private) {
-      return identity.userId === resource.ownerId;
+      return false;
     }
 
     if (resource.visibility === RESOURCE_VISIBILITY.club) {

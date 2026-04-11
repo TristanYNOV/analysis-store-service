@@ -26,3 +26,9 @@
 - Panel = `private | club | public`, défaut création `private`.
 - En update panel/timeline, pas de patch granulaire de `content_json`: remplacer le bloc métier fourni.
 - `clubId` peut exister même quand `visibility` n'est pas `club`; seule contrainte: `visibility = club` impose `clubId`.
+
+- Séparer explicitement 4 responsabilités: autorisation d'accès, décision de redaction, transformation de vue (read/export), future crypto applicative.
+- Lecture standard et export d'une même ressource doivent partager la même politique de vue/redaction.
+- Panel: owner => vue complète, non-owner autorisé => vue redacted si contenu anonymisé.
+- Timeline: owner only en lecture/export (mécanisme de redaction préparé pour l'étape crypto future).
+

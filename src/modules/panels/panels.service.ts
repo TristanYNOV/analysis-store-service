@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { eq } from 'drizzle-orm';
 import { DbService } from '../../db/db.service';
 import { panels } from '../../db/schema';
+import { ResourceViewService } from '../resource-view/resource-view.service';
 import { AccessControlService } from '../security/access/access-control.service';
 import { RESOURCE_VISIBILITY } from '../security/access/resource-visibility';
 import { IdentityContext } from '../security/identity/identity-context.types';
@@ -12,6 +13,7 @@ export class PanelsService {
   constructor(
     private readonly dbService: DbService,
     private readonly accessControlService: AccessControlService,
+    private readonly resourceViewService: ResourceViewService,
   ) {}
 
   async create(identity: IdentityContext, dto: CreatePanelDto): Promise<PanelResourceResponseDto> {
@@ -35,7 +37,7 @@ export class PanelsService {
       throw new BadRequestException('Panel creation failed');
     }
 
-    return this.toResponse(created);
+    return this.resourceViewService.toPanelResponse(created, identity);
   }
 
   async list(identity: IdentityContext): Promise<PanelResourceResponseDto[]> {
@@ -48,20 +50,17 @@ export class PanelsService {
           clubId: resource.clubId,
         }),
       )
-      .map((resource) => this.toResponse(resource));
+      .map((resource) => this.resourceViewService.toPanelResponse(resource, identity));
   }
 
   async getById(panelId: string, identity: IdentityContext): Promise<PanelResourceResponseDto> {
-    const existing = await this.dbService.db.query.panels.findFirst({
-      where: eq(panels.id, panelId),
-    });
+    const existing = await this.loadAccessiblePanel(panelId, identity);
+    return this.resourceViewService.toPanelResponse(existing, identity);
+  }
 
-    if (!existing) {
-      throw new NotFoundException('Panel not found');
-    }
-
-    this.accessControlService.assertPanelAccess(identity, this.mapForAccess(existing));
-    return this.toResponse(existing);
+  async exportById(panelId: string, identity: IdentityContext): Promise<Record<string, unknown>> {
+    const existing = await this.loadAccessiblePanel(panelId, identity);
+    return this.resourceViewService.toPanelExport(existing, identity);
   }
 
   async patchById(panelId: string, identity: IdentityContext, dto: PatchPanelDto): Promise<PanelResourceResponseDto> {
@@ -94,7 +93,7 @@ export class PanelsService {
       throw new BadRequestException('Panel update failed');
     }
 
-    return this.toResponse(updated);
+    return this.resourceViewService.toPanelResponse(updated, identity);
   }
 
   async deleteById(panelId: string, identity: IdentityContext): Promise<void> {
@@ -135,7 +134,20 @@ export class PanelsService {
       throw new BadRequestException('Panel copy failed');
     }
 
-    return this.toResponse(copied);
+    return this.resourceViewService.toPanelResponse(copied, identity);
+  }
+
+  private async loadAccessiblePanel(panelId: string, identity: IdentityContext): Promise<typeof panels.$inferSelect> {
+    const existing = await this.dbService.db.query.panels.findFirst({
+      where: eq(panels.id, panelId),
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Panel not found');
+    }
+
+    this.accessControlService.assertPanelAccess(identity, this.mapForAccess(existing));
+    return existing;
   }
 
   private assertPanelVisibilityConsistency(
@@ -156,21 +168,6 @@ export class PanelsService {
       ownerId: resource.ownerUserId,
       visibility: resource.visibility,
       clubId: resource.clubId,
-    };
-  }
-
-  private toResponse(resource: typeof panels.$inferSelect): PanelResourceResponseDto {
-    return {
-      id: resource.id,
-      ownerUserId: resource.ownerUserId,
-      title: resource.title,
-      description: resource.description,
-      visibility: resource.visibility,
-      clubId: resource.clubId,
-      contentJson: resource.contentJson,
-      hasAnonymizedContent: resource.hasAnonymizedContent,
-      createdAt: resource.createdAt.toISOString(),
-      updatedAt: resource.updatedAt.toISOString(),
     };
   }
 }

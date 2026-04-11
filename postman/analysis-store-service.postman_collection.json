@@ -90,6 +90,132 @@
       "name": "Timelines",
       "item": [
         {
+          "name": "Create timeline (owner)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Timeline owner\",\n  \"description\": \"created by owner\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"analysis-timeline\",\n    \"timelineName\": \"Timeline owner\",\n    \"eventDefs\": [],\n    \"labelDefs\": [],\n    \"occurrences\": [],\n    \"ui\": {\n      \"zoom\": 1,\n      \"showLabels\": true,\n      \"selectedOccurrenceId\": null\n    }\n  },\n  \"hasAnonymizedContent\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List timelines (owner)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get timeline by id (owner)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get timeline by id (non-owner forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timelines/{{timelineId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timelines",
+                "{{timelineId}}"
+              ]
+            }
+          }
+        },
+        {
           "name": "Patch timeline by owner (200)",
           "request": {
             "method": "PATCH",
@@ -227,7 +353,263 @@
       "name": "Panels",
       "item": [
         {
-          "name": "Patch panel owner private/public/club (200)",
+          "name": "Create panel private",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Panel private\",\n  \"description\": \"panel created\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Panel private\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n      \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n      \"exportedAtIso\": \"2026-04-04T09:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": []\n  },\n  \"hasAnonymizedContent\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create panel public",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Panel public\",\n  \"description\": \"panel created\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Panel public\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n      \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n      \"exportedAtIso\": \"2026-04-04T09:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": []\n  },\n  \"hasAnonymizedContent\": false,\n  \"visibility\": \"public\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create panel club",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Panel club\",\n  \"description\": \"panel created\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Panel club\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n      \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n      \"exportedAtIso\": \"2026-04-04T09:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": []\n  },\n  \"hasAnonymizedContent\": false,\n  \"visibility\": \"club\",\n  \"clubId\": \"club-1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/panels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List panels",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get panel private by id (owner)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{ownerUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-2"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{panelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{panelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get panel public by id (reader)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{publicPanelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{publicPanelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get panel club by id (authorized)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{clubReaderUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-1,club-7"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{clubPanelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{clubPanelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get panel club by id (forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-auth-user-id",
+                "value": "{{otherUserId}}"
+              },
+              {
+                "key": "x-auth-club-ids",
+                "value": "club-9"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/panels/{{clubPanelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "panels",
+                "{{clubPanelId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Patch panel by owner (200)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -246,7 +628,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Panel patched by owner\",\n  \"description\": \"owner patch\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Patch Owner\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n      \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n      \"exportedAtIso\": \"2026-04-04T09:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": []\n  },\n  \"visibility\": \"club\",\n  \"clubId\": \"club-1\",\n  \"hasAnonymizedContent\": false\n}"
+              "raw": "{\n  \"title\": \"Patch Owner\",\n  \"description\": \"panel created\",\n  \"contentJson\": {\n    \"schemaVersion\": \"1.0.0\",\n    \"type\": \"sequencer-panel\",\n    \"panelName\": \"Patch Owner\",\n    \"meta\": {\n      \"createdAtIso\": \"2026-04-04T08:00:00Z\",\n      \"updatedAtIso\": \"2026-04-04T08:30:00Z\",\n      \"exportedAtIso\": \"2026-04-04T09:00:00Z\",\n      \"sourceUserId\": null,\n      \"sourceApp\": \"analysis-store-service\",\n      \"sourceAppVersion\": \"1.0.0\"\n    },\n    \"btnList\": []\n  },\n  \"hasAnonymizedContent\": false,\n  \"visibility\": \"club\",\n  \"clubId\": \"club-1\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/panels/{{panelId}}",
@@ -359,7 +741,7 @@
           }
         },
         {
-          "name": "Copy public panel readable by non-owner (201)",
+          "name": "Copy public panel",
           "request": {
             "method": "POST",
             "header": [
@@ -395,7 +777,7 @@
           }
         },
         {
-          "name": "Copy club panel readable with matching clubIds (201)",
+          "name": "Copy club panel autorisé",
           "request": {
             "method": "POST",
             "header": [
@@ -431,7 +813,7 @@
           }
         },
         {
-          "name": "Copy club panel non-readable without matching clubIds (403)",
+          "name": "Copy club panel non autorisé",
           "request": {
             "method": "POST",
             "header": [

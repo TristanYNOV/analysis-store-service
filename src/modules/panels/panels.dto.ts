@@ -64,6 +64,59 @@ export class PatchPanelDto {
   created_at?: string;
 }
 
+export class CreatePanelDto {
+  @IsString()
+  @IsNotEmpty()
+  title!: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreatePanelDto) => dto.description !== null && dto.description !== undefined)
+  @IsString()
+  description?: string | null;
+
+  @IsObject()
+  contentJson!: Record<string, unknown>;
+
+  @IsOptional()
+  @IsIn(Object.values(RESOURCE_VISIBILITY))
+  visibility?: ResourceVisibility;
+
+  @IsOptional()
+  @ValidateIf((dto: CreatePanelDto) => dto.clubId !== null && dto.clubId !== undefined)
+  @IsString()
+  @IsNotEmpty()
+  clubId?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  hasAnonymizedContent?: boolean;
+
+  @IsOptional()
+  @ValidateIf((dto: CreatePanelDto) => dto.id !== undefined)
+  @IsEmpty({ message: 'id is immutable' })
+  id?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreatePanelDto) => dto.ownerUserId !== undefined)
+  @IsEmpty({ message: 'ownerUserId is immutable' })
+  ownerUserId?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreatePanelDto) => dto.owner_user_id !== undefined)
+  @IsEmpty({ message: 'owner_user_id is immutable' })
+  owner_user_id?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreatePanelDto) => dto.createdAt !== undefined)
+  @IsEmpty({ message: 'createdAt is immutable' })
+  createdAt?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreatePanelDto) => dto.created_at !== undefined)
+  @IsEmpty({ message: 'created_at is immutable' })
+  created_at?: string;
+}
+
 export interface PanelResourceResponseDto {
   id: string;
   ownerUserId: string;

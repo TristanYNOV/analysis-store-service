@@ -33,7 +33,7 @@ export class AccessControlService {
     identity: IdentityContext,
     resource: TimelineOwnership | null,
     resourceLabel = 'Timeline',
-  ): void {
+  ): asserts resource is TimelineOwnership {
     if (!resource) {
       throw new NotFoundException(`${resourceLabel} not found`);
     }
@@ -47,7 +47,7 @@ export class AccessControlService {
     identity: IdentityContext,
     resource: PanelAccessResource | null,
     resourceLabel = 'Panel',
-  ): void {
+  ): asserts resource is PanelAccessResource {
     if (!resource) {
       throw new NotFoundException(`${resourceLabel} not found`);
     }

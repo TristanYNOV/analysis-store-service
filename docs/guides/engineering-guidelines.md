@@ -22,5 +22,7 @@
 - Séparer strictement droits de lecture et droits d'écriture:
   - visibilité = accessibilité de lecture uniquement.
   - update/delete = owner only.
+- Timeline = ressource toujours privée (pas de `public`/`club`).
+- Panel = `private | club | public`, défaut création `private`.
 - En update panel/timeline, pas de patch granulaire de `content_json`: remplacer le bloc métier fourni.
 - `clubId` peut exister même quand `visibility` n'est pas `club`; seule contrainte: `visibility = club` impose `clubId`.

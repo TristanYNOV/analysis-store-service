@@ -52,6 +52,34 @@ export class PatchTimelineDto {
   created_at?: string;
 }
 
+export class CreateTimelineDto {
+  @IsString()
+  @IsNotEmpty()
+  title!: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreateTimelineDto) => dto.description !== null && dto.description !== undefined)
+  @IsString()
+  description?: string | null;
+
+  @IsObject()
+  contentJson!: Record<string, unknown>;
+
+  @IsOptional()
+  @IsBoolean()
+  hasAnonymizedContent?: boolean;
+
+  @IsOptional()
+  @ValidateIf((dto: CreateTimelineDto) => dto.visibility !== undefined)
+  @IsEmpty({ message: 'Timeline visibility is always private' })
+  visibility?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreateTimelineDto) => dto.clubId !== undefined)
+  @IsEmpty({ message: 'Timeline clubId is not supported' })
+  clubId?: string | null;
+}
+
 export interface TimelineResourceResponseDto {
   id: string;
   ownerUserId: string;

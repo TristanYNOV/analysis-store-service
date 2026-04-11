@@ -33,7 +33,7 @@ export class AccessControlService {
     identity: IdentityContext,
     resource: TimelineOwnership | null,
     resourceLabel = 'Timeline',
-  ): void {
+  ): asserts resource is TimelineOwnership {
     if (!resource) {
       throw new NotFoundException(`${resourceLabel} not found`);
     }
@@ -47,12 +47,40 @@ export class AccessControlService {
     identity: IdentityContext,
     resource: PanelAccessResource | null,
     resourceLabel = 'Panel',
-  ): void {
+  ): asserts resource is PanelAccessResource {
     if (!resource) {
       throw new NotFoundException(`${resourceLabel} not found`);
     }
 
     if (!this.canAccessPanel(identity, resource)) {
+      throw new ForbiddenException(`${resourceLabel} access denied`);
+    }
+  }
+
+  assertTimelineOwner(
+    identity: IdentityContext,
+    resource: { ownerUserId: string } | null | undefined,
+    resourceLabel = 'Timeline',
+  ): asserts resource is { ownerUserId: string } {
+    if (!resource) {
+      throw new NotFoundException(`${resourceLabel} not found`);
+    }
+
+    if (resource.ownerUserId !== identity.userId) {
+      throw new ForbiddenException(`${resourceLabel} access denied`);
+    }
+  }
+
+  assertPanelOwner(
+    identity: IdentityContext,
+    resource: { ownerUserId: string } | null | undefined,
+    resourceLabel = 'Panel',
+  ): asserts resource is { ownerUserId: string } {
+    if (!resource) {
+      throw new NotFoundException(`${resourceLabel} not found`);
+    }
+
+    if (resource.ownerUserId !== identity.userId) {
       throw new ForbiddenException(`${resourceLabel} access denied`);
     }
   }

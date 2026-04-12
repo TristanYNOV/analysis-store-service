@@ -25,7 +25,7 @@ describe('buildAppConfig', () => {
     expect(() =>
       buildAppConfig({
         NODE_ENV: 'development',
-        PORT: '3000',
+        PORT: '3001',
         MASTER_KEY: 'local-master-key',
         CRYPTO_KEY_VERSION: 'v1',
       }),

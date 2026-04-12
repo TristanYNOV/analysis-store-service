@@ -4,7 +4,7 @@ Ce document résume **ce qu’un front (ou Codex) doit implémenter** pour conso
 
 ## 1) Préconditions d’appel
 
-- Base URL locale par défaut: `http://localhost:3000`
+- Base URL locale par défaut: `http://localhost:3001`
 - Préfixe global API: `/api`
 - Toutes les routes métier (`/timelines`, `/panels`, `/security/*`) sont protégées par le contexte d’identité.
 - Header minimal requis sur routes protégées: `x-auth-user-id` (sinon `401`).

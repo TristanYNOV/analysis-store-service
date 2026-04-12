@@ -4,7 +4,7 @@ Objectif: intégrer le service derrière une gateway (Traefik) en s’alignant s
 
 ## 1) Exposition réseau
 
-- Service HTTP NestJS exposé sur `PORT` (défaut `3000`).
+- Service HTTP NestJS exposé sur `PORT` (défaut `3001`).
 - Préfixe global API: `/api`.
 - Endpoint de santé applicative: `GET /api/health`.
 - Réponse health attendue:
@@ -41,7 +41,7 @@ Routes avec identity guard (`x-auth-user-id` requis):
 
 Variables validées au boot:
 - `NODE_ENV`: `development | test | production` (défaut `development`)
-- `PORT`: entier `1..65535` (défaut `3000`)
+- `PORT`: entier `1..65535` (défaut `3001`)
 - `DATABASE_URL`: obligatoire hors `test`
 - `DB_NAME`: défaut `analysis_store`
 - `MASTER_KEY`: obligatoire hors `test`
@@ -61,10 +61,10 @@ Si variable critique absente/invalide: l’app échoue au démarrage (fail-fast)
 
 ## 6) Docker / Compose / reverse proxy: points d’attention
 
-- `Dockerfile` runtime expose `3000`.
-- `compose.yaml` local mappe `3000:3000` pour l’API et `5432:5432` pour Postgres.
+- `Dockerfile` runtime expose `3001`.
+- `compose.yaml` local mappe `3001:3001` pour l’API et `5432:5432` pour Postgres.
 - En environnement proxifié:
-  - router Traefik vers le port applicatif interne (`3000` par défaut)
+  - router Traefik vers le port applicatif interne (`3001` par défaut)
   - préserver les headers `x-auth-*` internes
   - éviter que des clients externes puissent surcharger ces headers
 

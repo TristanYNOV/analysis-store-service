@@ -13,3 +13,9 @@ Les premiers contrats DTO locaux sont disponibles dans `src/contracts/` pour ali
 - import preview timeline/panel (validation stricte distincte `timeline.json` vs `panel.json`, avec `schemaVersion`)
 
 La source de vérité métier interservice reste `docs/contracts/interservice-contracts.md`.
+
+## Guides d'intégration ciblés
+
+- Front/Codex (consommation API): `docs/contracts/front/README.md`
+- Infra/Traefik (exposition + headers internes): `docs/contracts/infra/README.md`
+

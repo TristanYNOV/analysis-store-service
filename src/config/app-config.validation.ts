@@ -1,6 +1,6 @@
 import { AppConfig, NodeEnv, RawAppEnv } from './app-config.types';
 
-const DEFAULT_PORT = 3000;
+const DEFAULT_PORT = 3001;
 const DEFAULT_DB_NAME = 'analysis_store';
 
 function parseNodeEnv(rawNodeEnv: string | undefined): NodeEnv {

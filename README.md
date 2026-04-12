@@ -66,7 +66,7 @@ npm run start:dev
 6. Vérifier l'endpoint:
 
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
 ```
 
 ## Quickstart (Docker)
@@ -78,7 +78,7 @@ docker compose up --build
 Puis:
 
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
 ```
 
 ## Variables d'environnement
@@ -86,7 +86,7 @@ curl http://localhost:3000/api/health
 Exemple fourni dans `.env.example`:
 
 - `NODE_ENV` (`development` | `test` | `production`, défaut: `development`)
-- `PORT` (défaut: `3000`)
+- `PORT` (défaut: `3001`)
 - `DATABASE_URL` (obligatoire sauf en `test`)
 - `DB_NAME` (défaut: `analysis_store`)
 - `MASTER_KEY` (obligatoire sauf en `test`)

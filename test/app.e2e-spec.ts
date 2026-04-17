@@ -400,6 +400,11 @@ describe('Panels and timelines redacted reads/exports (e2e)', () => {
       .set(panelReaderHeaders)
       .expect(200);
 
+    const nonOwnerCopyPublic = await request(app.getHttpServer())
+      .post(`/api/panels/${publicPanelId}/copy`)
+      .set(panelReaderHeaders)
+      .expect(201);
+
     expect(nonOwnerPublicExport.body).toEqual(nonOwnerPublicGet.body.contentJson);
     const firstButton = nonOwnerPublicExport.body.btnList[0] as Record<string, unknown>;
     expect(firstButton.name).toBe('Event anonymized 1');
@@ -418,6 +423,11 @@ describe('Panels and timelines redacted reads/exports (e2e)', () => {
     >)[0] as Record<string, unknown>;
     expect(listedPublicFirstButton.name).toBe('Event anonymized 1');
     expect((listedPublicFirstButton.eventProps as Record<string, unknown>).eventName).toBe('Event anonymized 1');
+
+    const copiedPublicFirstButton = (nonOwnerCopyPublic.body.contentJson.btnList[0] as Record<string, unknown>);
+    expect(nonOwnerCopyPublic.body.ownerUserId).toBe(panelReaderHeaders['x-auth-user-id']);
+    expect(copiedPublicFirstButton.name).toBe('Event anonymized 1');
+    expect((copiedPublicFirstButton.eventProps as Record<string, unknown>).eventName).toBe('Event anonymized 1');
 
     const nonOwnerClubExport = await request(app.getHttpServer())
       .get(`/api/panels/${clubPanelId}/export`)

@@ -58,7 +58,9 @@ export class ResourceViewService {
     hasAnonymizedContent: boolean,
     isOwner: boolean,
   ): Record<string, unknown> {
-    if (isOwner || !hasAnonymizedContent) {
+    const shouldRedact = !isOwner && (hasAnonymizedContent || this.redactionService.panelContentHasAnonymizedData(contentJson));
+
+    if (!shouldRedact) {
       return contentJson;
     }
 

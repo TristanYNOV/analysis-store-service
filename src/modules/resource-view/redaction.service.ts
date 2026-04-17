@@ -2,6 +2,14 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class RedactionService {
+  panelContentHasAnonymizedData(contentJson: Record<string, unknown>): boolean {
+    if (!this.isRecord(contentJson) || !Array.isArray(contentJson.btnList)) {
+      return false;
+    }
+
+    return contentJson.btnList.some((button) => this.isRecord(button) && this.isButtonMarkedAnonymized(button));
+  }
+
   redactPanelContent(contentJson: Record<string, unknown>): Record<string, unknown> {
     const copy = this.deepClone(contentJson);
 
@@ -20,7 +28,7 @@ export class RedactionService {
         return button;
       }
 
-      const type = this.resolveButtonType(button.type);
+      const type = this.resolveButtonType(button);
       if (!type) {
         return button;
       }
@@ -84,9 +92,23 @@ export class RedactionService {
     return 'Stat anonymized';
   }
 
-  private resolveButtonType(value: unknown): 'event' | 'label' | 'stat' | null {
-    if (value === 'event' || value === 'label' || value === 'stat') {
-      return value;
+  private resolveButtonType(button: Record<string, unknown>): 'event' | 'label' | 'stat' | null {
+    const { type } = button;
+
+    if (type === 'event' || type === 'label' || type === 'stat') {
+      return type;
+    }
+
+    if (this.isRecord(button.eventProps)) {
+      return 'event';
+    }
+
+    if (this.isRecord(button.labelProps)) {
+      return 'label';
+    }
+
+    if (this.isRecord(button.stat)) {
+      return 'stat';
     }
 
     return null;

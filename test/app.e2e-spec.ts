@@ -239,10 +239,9 @@ describe('Panels and timelines redacted reads/exports (e2e)', () => {
     btnList: [
       {
         id: 'btn-event',
-        name: 'Goal',
-        type: 'event',
+        name: 'henry',
         isAnonymized: true,
-        eventProps: { eventName: 'Goal', colorHex: '#00FFAA' },
+        eventProps: { eventName: 'henry', colorHex: '#00FFAA' },
         layout: { x: 0, y: 0, w: 2, h: 1, z: 0 },
         hotkeyNormalized: null,
         deactivateIds: [],
@@ -403,8 +402,22 @@ describe('Panels and timelines redacted reads/exports (e2e)', () => {
 
     expect(nonOwnerPublicExport.body).toEqual(nonOwnerPublicGet.body.contentJson);
     const firstButton = nonOwnerPublicExport.body.btnList[0] as Record<string, unknown>;
+    expect(firstButton.name).toBe('Event anonymized 1');
     expect((firstButton.eventProps as Record<string, unknown>).eventName).toBe('Event anonymized 1');
     expect(nonOwnerPublicExport.body.panelName).toBe('Sensitive panel');
+
+    const nonOwnerList = await request(app.getHttpServer())
+      .get('/api/panels')
+      .set(panelReaderHeaders)
+      .expect(200);
+    const listedPublicPanel = (nonOwnerList.body as Array<Record<string, unknown>>).find(
+      (resource) => resource.id === publicPanelId,
+    ) as Record<string, unknown>;
+    const listedPublicFirstButton = ((listedPublicPanel.contentJson as Record<string, unknown>).btnList as Array<
+      Record<string, unknown>
+    >)[0] as Record<string, unknown>;
+    expect(listedPublicFirstButton.name).toBe('Event anonymized 1');
+    expect((listedPublicFirstButton.eventProps as Record<string, unknown>).eventName).toBe('Event anonymized 1');
 
     const nonOwnerClubExport = await request(app.getHttpServer())
       .get(`/api/panels/${clubPanelId}/export`)
@@ -427,6 +440,11 @@ describe('Panels and timelines redacted reads/exports (e2e)', () => {
 
     await request(app.getHttpServer())
       .get(`/api/panels/${privatePanelId}/export`)
+      .set(externalHeaders)
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .get(`/api/panels/${privatePanelId}`)
       .set(externalHeaders)
       .expect(403);
   });

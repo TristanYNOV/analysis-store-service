@@ -122,4 +122,37 @@ describe('RedactionService', () => {
 
     expect(service.redactPanelContent(payload)).toEqual(payload);
   });
+
+  it('detects anonymized content from panel payload', () => {
+    expect(
+      service.panelContentHasAnonymizedData({
+        btnList: [{ id: 'btn-1', isAnonymized: true }],
+      }),
+    ).toBe(true);
+
+    expect(
+      service.panelContentHasAnonymizedData({
+        btnList: [{ id: 'btn-1', isAnonymized: false }],
+      }),
+    ).toBe(false);
+  });
+
+  it('redacts anonymized button values even when button type is missing but props are present', () => {
+    const payload = {
+      btnList: [
+        {
+          id: 'btn-evt-1',
+          name: 'henry',
+          isAnonymized: true,
+          eventProps: { eventName: 'henry', colorHex: '#00FFAA' },
+        },
+      ],
+    };
+
+    const redacted = service.redactPanelContent(payload);
+    const button = (redacted.btnList as Array<Record<string, unknown>>)[0] as Record<string, unknown>;
+
+    expect(button.name).toBe('Event anonymized 1');
+    expect((button.eventProps as Record<string, unknown>).eventName).toBe('Event anonymized 1');
+  });
 });

@@ -116,6 +116,7 @@ export class PanelsService {
     }
 
     this.accessControlService.assertPanelAccess(identity, this.mapForAccess(existing));
+    const projectedContent = this.resourceViewService.toPanelExport(existing, identity);
 
     const [copied] = await this.dbService.db
       .insert(panels)
@@ -125,7 +126,7 @@ export class PanelsService {
         clubId: existing.clubId,
         title: `${existing.title} (copy)`,
         description: existing.description,
-        contentJson: existing.contentJson,
+        contentJson: projectedContent,
         hasAnonymizedContent: existing.hasAnonymizedContent,
       })
       .returning();

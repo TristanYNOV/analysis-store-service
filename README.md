@@ -17,6 +17,7 @@ Contexte d'architecture:
 - [Cadrage v1](./docs/cadrage-v1.md)
 - [Contracts README](./docs/contracts/README.md)
 - [Interservice contracts](./docs/contracts/interservice-contracts.md)
+- [Infra integration contract (GHCR/CD)](./docs/contracts/infra/README.md)
 - [Engineering guidelines](./docs/guides/engineering-guidelines.md)
 
 ## Prérequis

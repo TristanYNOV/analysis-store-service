@@ -1,78 +1,98 @@
-# Contrat infra / Traefik → analysis-store-service (v1 réel)
+# Infra contract — `analysis-store-service` → repo `infra`
 
-Objectif: intégrer le service derrière une gateway (Traefik) en s’alignant sur le comportement réellement codé.
+Ce document est **copiable tel quel** dans `infra` pour intégrer l’image du service.
 
-## 1) Exposition réseau
+## 1) Image GHCR à consommer
 
-- Service HTTP NestJS exposé sur `PORT` (défaut `3001`).
-- Préfixe global API: `/api`.
-- Endpoint de santé applicative: `GET /api/health`.
-- Réponse health attendue:
-  - `status: "ok"`
-  - `service: "analysis-store-service"`
-  - `env: <node_env>`
-  - `timestamp: <iso>`
+- **Image**: `ghcr.io/<org-or-user>/analysis-store-service`
+- Dans ce repo, la publication est faite via `${{ github.repository }}` donc la forme effective est:
+  - `ghcr.io/<owner>/analysis-store-service`
 
-## 2) Hypothèse de sécurité (trust boundary)
+## 2) Stratégie de tags publiée
 
-- Le JWT est validé en bordure (gateway/Traefik + middleware auth externe).
-- Le service **ne valide pas** le JWT localement.
-- Le service consomme un contexte d’identité interne transmis par headers:
-  - `x-auth-user-id` (obligatoire sur routes protégées)
-  - `x-auth-club-ids` (optionnel, CSV ou JSON array stringifié)
-  - `x-auth-roles` (optionnel, CSV ou JSON array stringifié)
-- Si `x-auth-user-id` absent sur route protégée: `401 Unauthorized`.
+Publication sur push de tag SemVer Git (`vX.Y.Z`) :
 
-Conséquence infra: ces headers doivent être injectés/forwardés uniquement via le chemin interne de confiance; ne pas exposer ce mécanisme aux appels clients directs.
+- `X.Y.Z` (version complète)
+- `X.Y` (mineure)
+- `X` (majeure)
+- `sha-<commit>` (traçabilité build)
 
-## 3) Routes à protéger côté gateway
+Exemple pour `v1.4.2` :
+- `ghcr.io/<owner>/analysis-store-service:1.4.2`
+- `ghcr.io/<owner>/analysis-store-service:1.4`
+- `ghcr.io/<owner>/analysis-store-service:1`
+- `ghcr.io/<owner>/analysis-store-service:sha-abc1234...`
 
-Routes sans identity guard:
-- `GET /api/health`
-- `POST /api/imports/timelines/validate`
-- `POST /api/imports/panels/validate`
+## 3) Runtime contract pour `infra`
 
-Routes avec identity guard (`x-auth-user-id` requis):
-- `/api/security/*`
-- `/api/timelines/*`
-- `/api/panels/*`
+- **Port interne service**: `3001`
+- **Healthcheck applicatif interne**: `GET /api/health`
+- **Healthcheck infra attendu**: `GET /health` (via routage/rewrite gateway si utilisé)
+- **Dépendance**: PostgreSQL (obligatoire au démarrage)
+- **Exposition**: derrière Traefik
+- **Auth**: JWT validé en gateway; le service lit ensuite le contexte transmis en interne
 
-## 4) Variables d’environnement utiles à l’infra
+### Variables d’environnement minimales
 
-Variables validées au boot:
-- `NODE_ENV`: `development | test | production` (défaut `development`)
-- `PORT`: entier `1..65535` (défaut `3001`)
-- `DATABASE_URL`: obligatoire hors `test`
-- `DB_NAME`: défaut `analysis_store`
-- `MASTER_KEY`: obligatoire hors `test`
-- `CRYPTO_KEY_VERSION`: obligatoire hors `test`
+- `NODE_ENV=production`
+- `PORT=3001`
+- `DATABASE_URL=postgres://...`
+- `MASTER_KEY=...`
+- `CRYPTO_KEY_VERSION=v1`
+- `DB_NAME=analysis_store` (optionnel, défaut interne)
 
-Si variable critique absente/invalide: l’app échoue au démarrage (fail-fast).
+## 4) Contexte d’identité interne attendu
 
-## 5) Dépendance PostgreSQL
+Headers consommés par le service (injectés en interne, jamais depuis Internet):
 
-- Dépendance dure à PostgreSQL (Drizzle ORM).
-- `DATABASE_URL` doit pointer vers une DB accessible au démarrage.
-- Schéma principal utilisé par l’API v1:
-  - `timelines`
-  - `panels`
-  - `outbox_events`
-- Contrainte DB importante: `visibility='club'` nécessite `club_id` non null (timelines + panels).
+- `x-auth-user-id` (obligatoire sur routes protégées)
+- `x-auth-club-ids` (optionnel; CSV ou JSON array)
+- `x-auth-roles` (optionnel; CSV ou JSON array)
 
-## 6) Docker / Compose / reverse proxy: points d’attention
+Points Traefik/gateway:
 
-- `Dockerfile` runtime expose `3001`.
-- `compose.yaml` local mappe `3001:3001` pour l’API et `5432:5432` pour Postgres.
-- En environnement proxifié:
-  - router Traefik vers le port applicatif interne (`3001` par défaut)
-  - préserver les headers `x-auth-*` internes
-  - éviter que des clients externes puissent surcharger ces headers
+- ne pas laisser le client forger/surcharger ces headers
+- injecter/forwarder ces headers uniquement après validation JWT en bordure
 
-## 7) Intégration CI/CD (minimum utile)
+## 5) Exemple d’intégration Docker Compose (repo `infra`)
 
-Pour un wiring infra fiable:
-1. Build image (`npm run build` dans le Docker build stage).
-2. Injecter env requises (au moins `DATABASE_URL`, `MASTER_KEY`, `CRYPTO_KEY_VERSION`, `NODE_ENV=production`).
-3. Lancer migration DB avant/au déploiement (`npm run db:migrate`).
-4. Vérifier disponibilité via `GET /api/health`.
-5. Tester au moins un endpoint protégé avec headers injectés par la gateway (`/api/security/context`).
+```yaml
+services:
+  analysis-store-service:
+    image: ghcr.io/<owner>/analysis-store-service:1.4.2
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgres://analysis_store:${ANALYSIS_STORE_DB_PASSWORD}@postgres:5432/analysis_store
+      MASTER_KEY: ${ANALYSIS_STORE_MASTER_KEY}
+      CRYPTO_KEY_VERSION: v1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.analysis-store.rule=PathPrefix(`/analysis-store`)
+      - traefik.http.routers.analysis-store.entrypoints=websecure
+      - traefik.http.services.analysis-store.loadbalancer.server.port=3001
+      # Si exposition en /analysis-store, prévoir un rewrite/strip-prefix
+      # pour présenter /health côté gateway si nécessaire.
+```
+
+## 6) Pull GHCR privé (si package non public)
+
+Deux options standard:
+
+1. **GitHub Actions (`infra`)**: utiliser `GITHUB_TOKEN` avec permissions `packages: read`.
+2. **Runtime hors GitHub**: utiliser un PAT/robot token avec scope `read:packages`.
+
+Commande de login manuelle:
+
+```bash
+docker login ghcr.io -u <github-user> -p <token-read-packages>
+```

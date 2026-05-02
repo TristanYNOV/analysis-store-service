@@ -76,11 +76,19 @@ curl http://localhost:3001/api/health
 docker compose up --build
 ```
 
+Pour initialiser la base, exécuter ensuite les migrations depuis l'image/service:
+
+```bash
+docker compose run --rm analysis-store-service npm run db:migrate
+```
+
 Puis:
 
 ```bash
 curl http://localhost:3001/api/health
 ```
+
+L'image Docker runtime embarque `drizzle.config.ts` et le dossier `drizzle/` pour permettre un usage "one-shot migration" côté infra (sans dépendre du code source monté à l'exécution).
 
 ## Variables d'environnement
 

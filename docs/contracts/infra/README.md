@@ -32,6 +32,8 @@ Exemple pour `v1.4.2` :
 - **Exposition**: derrière Traefik
 - **Auth**: JWT validé en gateway; le service lit ensuite le contexte transmis en interne
 - **Migrations DB**: l'image est autosuffisante pour lancer `npm run db:migrate` (Drizzle)
+  - Le script cible explicitement `drizzle.config.ts` (pas de recherche de `drizzle.config.json`)
+  - `DATABASE_URL` est attendu via variables d'environnement (pas de `.env` embarqué requis)
 
 ### Variables d’environnement minimales
 

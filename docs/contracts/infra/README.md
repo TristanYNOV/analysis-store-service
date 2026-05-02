@@ -31,6 +31,7 @@ Exemple pour `v1.4.2` :
 - **Dépendance**: PostgreSQL (obligatoire au démarrage)
 - **Exposition**: derrière Traefik
 - **Auth**: JWT validé en gateway; le service lit ensuite le contexte transmis en interne
+- **Migrations DB**: l'image est autosuffisante pour lancer `npm run db:migrate` (Drizzle)
 
 ### Variables d’environnement minimales
 
@@ -83,6 +84,26 @@ services:
       # Si exposition en /analysis-store, prévoir un rewrite/strip-prefix
       # pour présenter /health côté gateway si nécessaire.
 ```
+
+### Service one-shot de migration (recommandé)
+
+Le repo `infra` peut ajouter un service temporaire dédié aux migrations, basé sur **la même image**:
+
+```yaml
+services:
+  analysis-store-migrate:
+    image: ghcr.io/<owner>/analysis-store-service:1.4.2
+    restart: "no"
+    command: ["npm", "run", "db:migrate"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://analysis_store:${ANALYSIS_STORE_DB_PASSWORD}@postgres:5432/analysis_store
+    depends_on:
+      postgres:
+        condition: service_healthy
+```
+
+Ce service one-shot reste orchestré côté `infra` (pas dans ce repo).
 
 ## 6) Pull GHCR privé (si package non public)
 

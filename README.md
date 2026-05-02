@@ -89,6 +89,7 @@ curl http://localhost:3001/api/health
 ```
 
 L'image Docker runtime embarque `drizzle.config.ts` et le dossier `drizzle/` pour permettre un usage "one-shot migration" côté infra (sans dépendre du code source monté à l'exécution).
+Les scripts Drizzle utilisent explicitement `--config=drizzle.config.ts` (pas de fallback vers `drizzle.config.json`) et lisent `DATABASE_URL` depuis l'environnement (pas de `.env` embarqué requis dans l'image).
 
 ## Variables d'environnement
 

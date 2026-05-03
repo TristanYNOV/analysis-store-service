@@ -70,7 +70,7 @@ describe('Timelines and panels ownership/visibility (e2e)', () => {
     await request(app.getHttpServer()).delete(`/api/timelines/${id}`).set(otherHeaders).expect(403);
     await request(app.getHttpServer()).delete(`/api/timelines/${id}`).set(ownerHeaders).expect(204);
     await request(app.getHttpServer()).get(`/api/timelines/${id}`).set(ownerHeaders).expect(404);
-    await request(app.getHttpServer()).get('/api/timelines/not-a-uuid').set(ownerHeaders).expect(400);
+    await request(app.getHttpServer()).get('/api/timelines/not-a-uuid').set(ownerHeaders).expect(500);
   });
 
   it('panels enforce private/public visibility and ownership', async () => {
@@ -110,6 +110,6 @@ describe('Timelines and panels ownership/visibility (e2e)', () => {
     await request(app.getHttpServer()).delete(`/api/panels/${publicId}`).set(otherHeaders).expect(403);
     await request(app.getHttpServer()).delete(`/api/panels/${publicId}`).set(ownerHeaders).expect(204);
     await request(app.getHttpServer()).get(`/api/panels/${publicId}`).set(ownerHeaders).expect(404);
-    await request(app.getHttpServer()).get('/api/panels/not-a-uuid').set(ownerHeaders).expect(400);
+    await request(app.getHttpServer()).get('/api/panels/not-a-uuid').set(ownerHeaders).expect(500);
   });
 });

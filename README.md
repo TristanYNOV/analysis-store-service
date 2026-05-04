@@ -117,6 +117,15 @@ La configuration est validée au démarrage. Si une variable critique est absent
 - `npm run db:studio`
 - `npm run db:check`
 
+## Observability
+
+`GET /metrics` expose les métriques Prometheus du service:
+- métriques runtime Node.js via `prom-client`,
+- métriques HTTP agrégées par méthode, route normalisée et code statut,
+- compteurs métier timelines, panels et validations d'import à faible cardinalité.
+
+Cet endpoint est hors préfixe API pour être scrapé directement par Prometheus. Les labels n'incluent jamais d'UUID timeline/panel, nom de timeline/panel, userId, payload métier ou contenu anonymisé.
+
 ## Schéma de base de données (étape actuelle)
 
 Tables implémentées:

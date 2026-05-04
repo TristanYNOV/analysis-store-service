@@ -9,6 +9,7 @@ import { ImportsModule } from './modules/imports/imports.module';
 import { SecurityModule } from './modules/security/security.module';
 import { EventsModule } from './modules/events/events.module';
 import { DbModule } from './db/db.module';
+import { MetricsController } from './observability/metrics.controller';
 
 @Module({
   imports: [
@@ -27,5 +28,6 @@ import { DbModule } from './db/db.module';
     SecurityModule,
     EventsModule,
   ],
+  controllers: [MetricsController],
 })
 export class AppModule {}

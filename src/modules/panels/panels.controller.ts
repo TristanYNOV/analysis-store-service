@@ -4,6 +4,12 @@ import { IdentityContextGuard } from '../security/identity/identity-context.guar
 import { IdentityContext } from '../security/identity/identity-context.types';
 import { CreatePanelDto, PanelResourceResponseDto, PatchPanelDto } from './panels.dto';
 import { PanelsService } from './panels.service';
+import {
+  analysisPanelsCreatedTotal,
+  analysisPanelsDeletedTotal,
+  analysisPanelsExportedTotal,
+  analysisPanelsUpdatedTotal,
+} from '../../observability/metrics';
 
 @Controller('panels')
 @UseGuards(IdentityContextGuard)
@@ -11,11 +17,18 @@ export class PanelsController {
   constructor(private readonly panelsService: PanelsService) {}
 
   @Post()
-  createPanel(
+  async createPanel(
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: CreatePanelDto,
   ): Promise<PanelResourceResponseDto> {
-    return this.panelsService.create(identity, body);
+    try {
+      const panel = await this.panelsService.create(identity, body);
+      analysisPanelsCreatedTotal.labels('panel', 'create', 'success').inc();
+      return panel;
+    } catch (error) {
+      analysisPanelsCreatedTotal.labels('panel', 'create', 'failure').inc();
+      throw error;
+    }
   }
 
   @Get()
@@ -24,11 +37,18 @@ export class PanelsController {
   }
 
   @Get(':id/export')
-  exportPanelById(
+  async exportPanelById(
     @Param('id') id: string,
     @CurrentIdentity() identity: IdentityContext,
   ): Promise<Record<string, unknown>> {
-    return this.panelsService.exportById(id, identity);
+    try {
+      const panel = await this.panelsService.exportById(id, identity);
+      analysisPanelsExportedTotal.labels('panel', 'export', 'success').inc();
+      return panel;
+    } catch (error) {
+      analysisPanelsExportedTotal.labels('panel', 'export', 'failure').inc();
+      throw error;
+    }
   }
 
   @Get(':id')
@@ -40,18 +60,31 @@ export class PanelsController {
   }
 
   @Patch(':id')
-  patchPanelById(
+  async patchPanelById(
     @Param('id') id: string,
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: PatchPanelDto,
   ): Promise<PanelResourceResponseDto> {
-    return this.panelsService.patchById(id, identity, body);
+    try {
+      const panel = await this.panelsService.patchById(id, identity, body);
+      analysisPanelsUpdatedTotal.labels('panel', 'update', 'success').inc();
+      return panel;
+    } catch (error) {
+      analysisPanelsUpdatedTotal.labels('panel', 'update', 'failure').inc();
+      throw error;
+    }
   }
 
   @Delete(':id')
   @HttpCode(204)
   async deletePanelById(@Param('id') id: string, @CurrentIdentity() identity: IdentityContext): Promise<void> {
-    await this.panelsService.deleteById(id, identity);
+    try {
+      await this.panelsService.deleteById(id, identity);
+      analysisPanelsDeletedTotal.labels('panel', 'delete', 'success').inc();
+    } catch (error) {
+      analysisPanelsDeletedTotal.labels('panel', 'delete', 'failure').inc();
+      throw error;
+    }
   }
 
   @Post(':id/copy')

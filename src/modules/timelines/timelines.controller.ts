@@ -11,7 +11,7 @@ export class TimelinesController {
   constructor(private readonly timelinesService: TimelinesService) {}
 
   @Post()
-  createTimeline(
+  async createTimeline(
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: CreateTimelineDto,
   ): Promise<TimelineResourceResponseDto> {
@@ -24,7 +24,7 @@ export class TimelinesController {
   }
 
   @Get(':id/export')
-  exportTimelineById(
+  async exportTimelineById(
     @Param('id') id: string,
     @CurrentIdentity() identity: IdentityContext,
   ): Promise<Record<string, unknown>> {
@@ -40,7 +40,7 @@ export class TimelinesController {
   }
 
   @Patch(':id')
-  patchTimelineById(
+  async patchTimelineById(
     @Param('id') id: string,
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: PatchTimelineDto,

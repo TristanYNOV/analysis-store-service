@@ -58,8 +58,6 @@ function histogram(
   );
 }
 
-const operationLabels = ['resource', 'operation', 'result'];
-
 export const httpRequestsTotal = counter(
   'http_requests_total',
   'Total number of HTTP requests.',
@@ -78,62 +76,33 @@ export const httpRequestsInFlight = gauge(
   ['method', 'route'],
 );
 
-export const analysisTimelinesCreatedTotal = counter(
-  'analysis_timelines_created_total',
-  'Total number of timeline creation operations.',
-  operationLabels,
-);
-
-export const analysisTimelinesUpdatedTotal = counter(
-  'analysis_timelines_updated_total',
-  'Total number of timeline update operations.',
-  operationLabels,
-);
-
-export const analysisTimelinesDeletedTotal = counter(
-  'analysis_timelines_deleted_total',
-  'Total number of timeline deletion operations.',
-  operationLabels,
-);
-
-export const analysisTimelinesExportedTotal = counter(
-  'analysis_timelines_exported_total',
-  'Total number of timeline export operations.',
-  operationLabels,
-);
-
-export const analysisPanelsCreatedTotal = counter(
-  'analysis_panels_created_total',
-  'Total number of panel creation operations.',
-  operationLabels,
-);
-
-export const analysisPanelsUpdatedTotal = counter(
-  'analysis_panels_updated_total',
-  'Total number of panel update operations.',
-  operationLabels,
-);
-
-export const analysisPanelsDeletedTotal = counter(
-  'analysis_panels_deleted_total',
-  'Total number of panel deletion operations.',
-  operationLabels,
-);
-
-export const analysisPanelsExportedTotal = counter(
-  'analysis_panels_exported_total',
-  'Total number of panel export operations.',
-  operationLabels,
-);
+const importValidationLabels = ['resource', 'operation', 'result'];
 
 export const analysisImportValidationTotal = counter(
   'analysis_import_validation_total',
   'Total number of import validation operations.',
-  operationLabels,
+  importValidationLabels,
 );
 
 export const analysisImportValidationFailedTotal = counter(
   'analysis_import_validation_failed_total',
   'Total number of failed import validation operations.',
-  operationLabels,
+  importValidationLabels,
 );
+
+export function recordImportValidation(
+  resource: 'timeline' | 'panel',
+  valid: boolean,
+): void {
+  const result = valid ? 'success' : 'failure';
+
+  analysisImportValidationTotal
+    .labels(resource, 'validate_import', result)
+    .inc();
+
+  if (!valid) {
+    analysisImportValidationFailedTotal
+      .labels(resource, 'validate_import', 'failure')
+      .inc();
+  }
+}

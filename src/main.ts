@@ -3,8 +3,8 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AppConfigService } from './config/app-config.service';
-import { httpMetricsMiddleware } from './observability/http-metrics.middleware';
 import { setupMetrics } from './observability/metrics';
+import { httpMetricsFallbackMiddleware } from './observability/http-metrics-fallback.middleware';
 
 const API_PREFIX = 'api';
 setupMetrics();
@@ -22,7 +22,7 @@ async function bootstrap(): Promise<void> {
       forbidUnknownValues: true,
     }),
   );
-  app.use(httpMetricsMiddleware);
+  app.use(httpMetricsFallbackMiddleware);
 
   await app.listen(configService.port);
 

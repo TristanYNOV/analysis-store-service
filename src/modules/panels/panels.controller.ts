@@ -4,12 +4,6 @@ import { IdentityContextGuard } from '../security/identity/identity-context.guar
 import { IdentityContext } from '../security/identity/identity-context.types';
 import { CreatePanelDto, PanelResourceResponseDto, PatchPanelDto } from './panels.dto';
 import { PanelsService } from './panels.service';
-import {
-  analysisPanelsCreatedTotal,
-  analysisPanelsDeletedTotal,
-  analysisPanelsExportedTotal,
-  analysisPanelsUpdatedTotal,
-} from '../../observability/metrics';
 
 @Controller('panels')
 @UseGuards(IdentityContextGuard)
@@ -21,14 +15,7 @@ export class PanelsController {
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: CreatePanelDto,
   ): Promise<PanelResourceResponseDto> {
-    try {
-      const panel = await this.panelsService.create(identity, body);
-      analysisPanelsCreatedTotal.labels('panel', 'create', 'success').inc();
-      return panel;
-    } catch (error) {
-      analysisPanelsCreatedTotal.labels('panel', 'create', 'failure').inc();
-      throw error;
-    }
+    return this.panelsService.create(identity, body);
   }
 
   @Get()
@@ -41,14 +28,7 @@ export class PanelsController {
     @Param('id') id: string,
     @CurrentIdentity() identity: IdentityContext,
   ): Promise<Record<string, unknown>> {
-    try {
-      const panel = await this.panelsService.exportById(id, identity);
-      analysisPanelsExportedTotal.labels('panel', 'export', 'success').inc();
-      return panel;
-    } catch (error) {
-      analysisPanelsExportedTotal.labels('panel', 'export', 'failure').inc();
-      throw error;
-    }
+    return this.panelsService.exportById(id, identity);
   }
 
   @Get(':id')
@@ -65,26 +45,13 @@ export class PanelsController {
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: PatchPanelDto,
   ): Promise<PanelResourceResponseDto> {
-    try {
-      const panel = await this.panelsService.patchById(id, identity, body);
-      analysisPanelsUpdatedTotal.labels('panel', 'update', 'success').inc();
-      return panel;
-    } catch (error) {
-      analysisPanelsUpdatedTotal.labels('panel', 'update', 'failure').inc();
-      throw error;
-    }
+    return this.panelsService.patchById(id, identity, body);
   }
 
   @Delete(':id')
   @HttpCode(204)
   async deletePanelById(@Param('id') id: string, @CurrentIdentity() identity: IdentityContext): Promise<void> {
-    try {
-      await this.panelsService.deleteById(id, identity);
-      analysisPanelsDeletedTotal.labels('panel', 'delete', 'success').inc();
-    } catch (error) {
-      analysisPanelsDeletedTotal.labels('panel', 'delete', 'failure').inc();
-      throw error;
-    }
+    await this.panelsService.deleteById(id, identity);
   }
 
   @Post(':id/copy')

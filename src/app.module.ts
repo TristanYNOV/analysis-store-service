@@ -9,6 +9,9 @@ import { ImportsModule } from './modules/imports/imports.module';
 import { SecurityModule } from './modules/security/security.module';
 import { EventsModule } from './modules/events/events.module';
 import { DbModule } from './db/db.module';
+import { MetricsController } from './observability/metrics.controller';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { HttpMetricsInterceptor } from './observability/http-metrics.interceptor';
 
 @Module({
   imports: [
@@ -26,6 +29,13 @@ import { DbModule } from './db/db.module';
     ImportsModule,
     SecurityModule,
     EventsModule,
+  ],
+  controllers: [MetricsController],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpMetricsInterceptor,
+    },
   ],
 })
 export class AppModule {}

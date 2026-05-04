@@ -11,7 +11,7 @@ export class PanelsController {
   constructor(private readonly panelsService: PanelsService) {}
 
   @Post()
-  createPanel(
+  async createPanel(
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: CreatePanelDto,
   ): Promise<PanelResourceResponseDto> {
@@ -24,7 +24,7 @@ export class PanelsController {
   }
 
   @Get(':id/export')
-  exportPanelById(
+  async exportPanelById(
     @Param('id') id: string,
     @CurrentIdentity() identity: IdentityContext,
   ): Promise<Record<string, unknown>> {
@@ -40,7 +40,7 @@ export class PanelsController {
   }
 
   @Patch(':id')
-  patchPanelById(
+  async patchPanelById(
     @Param('id') id: string,
     @CurrentIdentity() identity: IdentityContext,
     @Body() body: PatchPanelDto,

@@ -2,6 +2,8 @@ import { AppConfig, NodeEnv, RawAppEnv } from './app-config.types';
 
 const DEFAULT_PORT = 3001;
 const DEFAULT_DB_NAME = 'analysis_store';
+const DEFAULT_RABBITMQ_EXCHANGE = 'domain.events';
+const DEFAULT_RABBITMQ_QUEUE_ANALYSIS_STORE = 'analysis-store-service.user-deletion';
 
 function parseNodeEnv(rawNodeEnv: string | undefined): NodeEnv {
   const nodeEnv = rawNodeEnv ?? 'development';
@@ -68,5 +70,9 @@ export function buildAppConfig(rawEnv: RawAppEnv): AppConfig {
       nodeEnv,
       'v1-test',
     ),
+    rabbitmqUrl: rawEnv.RABBITMQ_URL?.trim() || undefined,
+    rabbitmqExchange: rawEnv.RABBITMQ_EXCHANGE?.trim() || DEFAULT_RABBITMQ_EXCHANGE,
+    rabbitmqQueueAnalysisStore:
+      rawEnv.RABBITMQ_QUEUE_ANALYSIS_STORE?.trim() || DEFAULT_RABBITMQ_QUEUE_ANALYSIS_STORE,
   };
 }

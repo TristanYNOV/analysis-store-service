@@ -1,5 +1,13 @@
 # analysis-store-service
 
+## Suppression utilisateur event-driven
+
+`analysis-store-service` consomme `user.deletion.requested` depuis RabbitMQ et publie `user.data.anonymized` apres cleanup.
+
+- Exchange: `domain.events`
+- Queue: `analysis-store-service.user-deletion`
+- Documentation: [docs/contracts/events/user-deletion.md](docs/contracts/events/user-deletion.md)
+
 Backend NestJS responsable du stockage des résultats d'analyse, avec une base technique prête pour timelines, panels et imports.
 
 ## Rôle du service
@@ -75,6 +83,17 @@ curl http://localhost:3001/api/health
 ```bash
 docker compose up --build
 ```
+
+Le compose local expose RabbitMQ sur `localhost:5673` et son UI sur `localhost:15673` afin d'eviter les conflits avec `auth-service`, qui peut deja exposer RabbitMQ sur `5672/15672` en developpement multi-repos.
+
+Pour lancer l'API en local avec `npm run start` ou `npm run start:dev`, utiliser des URLs hote:
+
+```bash
+DATABASE_URL=postgres://analysis_store:analysis_store@localhost:5432/analysis_store
+RABBITMQ_URL=amqp://app:change_me@localhost:5673
+```
+
+Pour tester le workflow complet avec `auth-service`, les deux services doivent utiliser le meme broker RabbitMQ. Le plus simple est de garder un seul RabbitMQ lance et de mettre le meme `RABBITMQ_URL` dans les deux `.env`.
 
 Pour initialiser la base, exécuter ensuite les migrations depuis l'image/service:
 

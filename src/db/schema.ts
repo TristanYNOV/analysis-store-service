@@ -96,6 +96,20 @@ export const outboxEvents = pgTable(
   ],
 );
 
+export const processedEvents = pgTable(
+  'processed_events',
+  {
+    eventId: text('event_id').primaryKey(),
+    eventType: text('event_type').notNull(),
+    processedAt: timestamp('processed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('processed_events_event_type_idx').on(table.eventType),
+    index('processed_events_processed_at_idx').on(table.processedAt),
+  ],
+);
+
 export type Timeline = typeof timelines.$inferSelect;
 export type Panel = typeof panels.$inferSelect;
 export type OutboxEvent = typeof outboxEvents.$inferSelect;
+export type ProcessedEvent = typeof processedEvents.$inferSelect;

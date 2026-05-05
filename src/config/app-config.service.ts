@@ -33,4 +33,16 @@ export class AppConfigService {
   get cryptoKeyVersion(): string {
     return this.appConfig.cryptoKeyVersion;
   }
+
+  get rabbitmqUrl(): string | undefined {
+    return this.appConfig.rabbitmqUrl;
+  }
+
+  get rabbitmqExchange(): string {
+    return this.appConfig.rabbitmqExchange;
+  }
+
+  get rabbitmqQueueAnalysisStore(): string {
+    return this.appConfig.rabbitmqQueueAnalysisStore;
+  }
 }

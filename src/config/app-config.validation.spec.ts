@@ -18,6 +18,9 @@ describe('buildAppConfig', () => {
       dbName: 'analysis_store',
       masterKey: 'prod-master-key',
       cryptoKeyVersion: 'v2',
+      rabbitmqUrl: undefined,
+      rabbitmqExchange: 'domain.events',
+      rabbitmqQueueAnalysisStore: 'analysis-store-service.user-deletion',
     });
   });
 

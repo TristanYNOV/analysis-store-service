@@ -7,6 +7,9 @@ export interface RawAppEnv {
   DB_NAME?: string;
   MASTER_KEY?: string;
   CRYPTO_KEY_VERSION?: string;
+  RABBITMQ_URL?: string;
+  RABBITMQ_EXCHANGE?: string;
+  RABBITMQ_QUEUE_ANALYSIS_STORE?: string;
 }
 
 export interface AppConfig {
@@ -16,4 +19,7 @@ export interface AppConfig {
   dbName: string;
   masterKey: string;
   cryptoKeyVersion: string;
+  rabbitmqUrl?: string;
+  rabbitmqExchange: string;
+  rabbitmqQueueAnalysisStore: string;
 }

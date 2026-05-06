@@ -10,18 +10,18 @@ Ce document est **copiable tel quel** dans `infra` pour intégrer l’image du s
 
 ## 2) Stratégie de tags publiée
 
-Publication sur push de tag SemVer Git (`vX.Y.Z`) :
+Publication sur push de tag SemVer Git (`vX.Y.Z`), uniquement si le commit taggé appartient à l'historique de `origin/prod`:
 
+- `latest`
+- `prod`
 - `X.Y.Z` (version complète)
-- `X.Y` (mineure)
-- `X` (majeure)
-- `sha-<commit>` (traçabilité build)
 
 Exemple pour `v1.4.2` :
+- `ghcr.io/<owner>/analysis-store-service:latest`
+- `ghcr.io/<owner>/analysis-store-service:prod`
 - `ghcr.io/<owner>/analysis-store-service:1.4.2`
-- `ghcr.io/<owner>/analysis-store-service:1.4`
-- `ghcr.io/<owner>/analysis-store-service:1`
-- `ghcr.io/<owner>/analysis-store-service:sha-abc1234...`
+
+Aucun tag Docker de branche, `sha-*`, `dev`, `main`, `master`, `vX.Y.Z`, majeur seul ou mineur seul n'est publié.
 
 ## 3) Runtime contract pour `infra`
 

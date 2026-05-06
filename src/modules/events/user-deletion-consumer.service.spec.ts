@@ -22,6 +22,19 @@ function buildEvent(overrides: Partial<UserDeletionRequestedEvent> = {}): UserDe
 }
 
 describe('UserDeletionConsumerService', () => {
+  const metrics = {
+    recordPublishedEvent: jest.fn(),
+    recordConsumedEvent: jest.fn(),
+    recordCleanupResources: jest.fn(),
+    startPublishTimer: jest.fn(),
+    startProcessingTimer: jest.fn(() => jest.fn()),
+    startCleanupTimer: jest.fn(() => jest.fn()),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('publishes confirmation and records the processed event', async () => {
     const insertValues = jest.fn().mockResolvedValue(undefined);
     const dbService = {
@@ -52,6 +65,7 @@ describe('UserDeletionConsumerService', () => {
       rabbitmqService as unknown as RabbitmqService,
       cleanupService as unknown as UserDeletionCleanupService,
       dbService as never,
+      metrics as never,
     );
 
     const confirmation = await service.handleEvent(buildEvent());
@@ -78,6 +92,15 @@ describe('UserDeletionConsumerService', () => {
       }),
     );
     expect(confirmation?.eventType).toBe(USER_DATA_ANONYMIZED);
+    expect(metrics.recordCleanupResources).toHaveBeenCalledWith({
+      deletedResources: { timelines: 2, privatePanels: 1 },
+      anonymizedResources: { publicPanels: 3 },
+    });
+    expect(metrics.recordConsumedEvent).toHaveBeenCalledWith(
+      USER_DELETION_REQUESTED,
+      USER_DELETION_REQUESTED,
+      'success',
+    );
   });
 
   it('is idempotent when the event was already processed', async () => {
@@ -104,10 +127,16 @@ describe('UserDeletionConsumerService', () => {
       rabbitmqService as unknown as RabbitmqService,
       cleanupService as unknown as UserDeletionCleanupService,
       dbService as never,
+      metrics as never,
     );
 
     await expect(service.handleEvent(buildEvent())).resolves.toBeNull();
     expect(cleanupService.cleanupUserData).not.toHaveBeenCalled();
     expect(rabbitmqService.publish).not.toHaveBeenCalled();
+    expect(metrics.recordConsumedEvent).toHaveBeenCalledWith(
+      USER_DELETION_REQUESTED,
+      USER_DELETION_REQUESTED,
+      'duplicate',
+    );
   });
 });

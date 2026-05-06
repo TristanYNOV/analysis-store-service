@@ -142,10 +142,53 @@ La configuration est validée au démarrage. Si une variable critique est absent
 - métriques runtime Node.js via `prom-client`,
 - métriques HTTP agrégées par méthode, route normalisée et code statut,
 - compteur métier de validation d'import à faible cardinalité, car le résultat métier `valid=false` n'est pas déductible du code statut HTTP.
+- métriques RabbitMQ métier et cleanup de suppression utilisateur.
 
 Les opérations timelines et panels usuelles sont déduites des métriques HTTP par route et code statut.
 
 Cet endpoint est hors préfixe API pour être scrapé directement par Prometheus. Les labels n'incluent jamais d'UUID timeline/panel, nom de timeline/panel, userId, payload métier ou contenu anonymisé.
+
+### Métriques RabbitMQ métier
+
+Événements couverts:
+- consommation `user.deletion.requested`
+- publication `user.data.anonymized`
+
+Métriques communes:
+- `rabbitmq_business_events_published_total`
+- `rabbitmq_business_events_consumed_total`
+- `rabbitmq_business_event_publish_duration_seconds`
+- `rabbitmq_business_event_processing_duration_seconds`
+
+Labels:
+- `service` (label Prometheus par défaut du service)
+- `event_type`
+- `routing_key`
+- `result`
+
+Valeurs bornées:
+- `event_type` / `routing_key`: `user.deletion.requested`, `user.data.anonymized`, `unknown`
+- `result` publication: `success`, `failure`
+- `result` consommation: `success`, `failure`, `ignored`, `duplicate`, `invalid`
+
+Métriques cleanup utilisateur:
+- `analysis_user_cleanup_resources_total` avec `resource`, `action`
+- `analysis_user_cleanup_duration_seconds` avec `result`
+
+Valeurs bornées:
+- `resource`: `timeline`, `private_panel`, `public_panel`
+- `action`: `deleted`, `anonymized`
+- `result`: `success`, `failure`, `duplicate`, `invalid`
+
+PromQL utiles:
+
+```promql
+sum by(event_type, result) (rate(rabbitmq_business_events_published_total{service="analysis-store-service"}[5m]))
+sum by(event_type, result) (rate(rabbitmq_business_events_consumed_total{service="analysis-store-service"}[5m]))
+histogram_quantile(0.95, sum by(le, event_type) (rate(rabbitmq_business_event_processing_duration_seconds_bucket{service="analysis-store-service"}[5m])))
+sum by(resource, action) (rate(analysis_user_cleanup_resources_total{service="analysis-store-service"}[5m]))
+histogram_quantile(0.95, sum by(le, result) (rate(analysis_user_cleanup_duration_seconds_bucket{service="analysis-store-service"}[5m])))
+```
 
 ## Schéma de base de données (étape actuelle)
 

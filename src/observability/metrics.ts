@@ -106,3 +106,39 @@ export function recordImportValidation(
       .inc();
   }
 }
+
+export const rabbitmqBusinessEventsPublishedTotal = counter(
+  'rabbitmq_business_events_published_total',
+  'Total number of RabbitMQ business events published.',
+  ['event_type', 'routing_key', 'result'],
+);
+
+export const rabbitmqBusinessEventsConsumedTotal = counter(
+  'rabbitmq_business_events_consumed_total',
+  'Total number of RabbitMQ business events consumed.',
+  ['event_type', 'routing_key', 'result'],
+);
+
+export const rabbitmqBusinessEventPublishDurationSeconds = histogram(
+  'rabbitmq_business_event_publish_duration_seconds',
+  'RabbitMQ business event publish duration in seconds.',
+  ['event_type', 'routing_key', 'result'],
+);
+
+export const rabbitmqBusinessEventProcessingDurationSeconds = histogram(
+  'rabbitmq_business_event_processing_duration_seconds',
+  'RabbitMQ business event consumer processing duration in seconds.',
+  ['event_type', 'routing_key', 'result'],
+);
+
+export const analysisUserCleanupResourcesTotal = counter(
+  'analysis_user_cleanup_resources_total',
+  'Total number of resources deleted or anonymized during user cleanup.',
+  ['resource', 'action'],
+);
+
+export const analysisUserCleanupDurationSeconds = histogram(
+  'analysis_user_cleanup_duration_seconds',
+  'User cleanup duration in seconds.',
+  ['result'],
+);

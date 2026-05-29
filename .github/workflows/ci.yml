@@ -32,7 +32,7 @@ jobs:
         run: npm run lint
 
       - name: Unit tests
-        run: npm test -- --runInBand
+        run: npm run test:ci
 
       - name: Build
         run: npm run build

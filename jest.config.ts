@@ -10,6 +10,7 @@ const config: Config = {
   collectCoverageFrom: ['src/**/*.(t|j)s'],
   coverageDirectory: 'coverage',
   testEnvironment: 'node',
+  watchman: false,
 };
 
 export default config;

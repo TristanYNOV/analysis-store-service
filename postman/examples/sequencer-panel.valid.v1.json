@@ -17,7 +17,10 @@
       "type": "event",
       "eventProps": {
         "eventName": "Goal",
-        "colorHex": "#00FFAA"
+        "colorHex": "#00FFAA",
+        "kind": "indefinite",
+        "preMs": 1000,
+        "postMs": 2000
       },
       "layout": { "x": 0, "y": 0, "w": 2, "h": 1, "z": 0 },
       "hotkeyNormalized": "Ctrl+G",
@@ -28,9 +31,11 @@
       "id": "btn-label-phase1",
       "name": "Phase 1",
       "type": "label",
+      "isAnonymized": false,
       "labelProps": {
         "label": "Build-up",
-        "colorHex": "#112233"
+        "colorHex": "#112233",
+        "mode": "indefinite"
       },
       "layout": { "x": 2, "y": 0, "w": 2, "h": 1, "z": 1 },
       "hotkeyNormalized": null,
@@ -44,7 +49,19 @@
       "stat": {
         "statName": "possession",
         "value": 56,
-        "colorHex": "#445566"
+        "colorHex": "#445566",
+        "definition": {
+          "mode": "simple",
+          "query": {
+            "eventIds": ["btn-event-goal"],
+            "labelIds": ["btn-label-phase1"],
+            "labelColorById": {
+              "btn-label-phase1": "#112233"
+            },
+            "metric": "count",
+            "labelMatch": "all"
+          }
+        }
       },
       "layout": { "x": 4, "y": 0, "w": 2, "h": 1, "z": 2 },
       "hotkeyNormalized": null,

@@ -80,7 +80,7 @@ export class PanelsService {
       .set({
         title: dto.title ?? existing.title,
         description: dto.description === undefined ? existing.description : dto.description,
-        contentJson: dto.contentJson,
+        contentJson: dto.contentJson ?? existing.contentJson,
         visibility: resolvedVisibility,
         clubId: resolvedClubId,
         hasAnonymizedContent: dto.hasAnonymizedContent ?? existing.hasAnonymizedContent,

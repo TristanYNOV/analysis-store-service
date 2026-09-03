@@ -19,5 +19,6 @@ COPY package.json ./package.json
 # (e.g. one-shot migration service in infra) via `npm run db:migrate`.
 COPY drizzle.config.ts ./drizzle.config.ts
 COPY drizzle ./drizzle
+COPY scripts ./scripts
 EXPOSE 3001
 CMD ["node", "dist/main"]

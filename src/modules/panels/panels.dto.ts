@@ -21,8 +21,9 @@ export class PatchPanelDto {
   @IsString()
   description?: string | null;
 
+  @IsOptional()
   @IsObject()
-  contentJson!: Record<string, unknown>;
+  contentJson?: Record<string, unknown>;
 
   @IsOptional()
   @IsIn(Object.values(RESOURCE_VISIBILITY))

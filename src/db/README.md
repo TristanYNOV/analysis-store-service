@@ -12,7 +12,8 @@ This folder now contains the PostgreSQL + Drizzle bootstrap used by the next imp
 ## Commands
 
 - `npm run db:generate` to generate migration files from schema.
-- `npm run db:migrate` to apply migrations.
+- `npm run db:migrate` to ensure, apply, and verify migrations.
+- `npm run db:migrate:raw` to run Drizzle's migrator directly.
 - `npm run db:studio` to inspect data with Drizzle Studio.
 - `npm run db:check` to verify connection with current `DATABASE_URL`.
 

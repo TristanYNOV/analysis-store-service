@@ -112,13 +112,14 @@ Ce document résume **ce qu’un front (ou Codex) doit implémenter** pour conso
 ### `PATCH /api/panels/:id`
 - Owner uniquement.
 - Body:
-  - `contentJson: object` (required)
+  - `contentJson?: object`
   - `title?: string`
   - `description?: string | null`
   - `visibility?: "private" | "club" | "public"`
   - `clubId?: string | null`
   - `hasAnonymizedContent?: boolean`
 - Règle: si la visibilité résolue est `club`, `clubId` résolu doit être non-null.
+- Permet de repasser un panel propriétaire `public` ou `club` en `private` avec `{ "visibility": "private", "clubId": null }`.
 
 ### `DELETE /api/panels/:id`
 - Owner uniquement.
@@ -184,6 +185,35 @@ interface AnalysisTimelineV1 {
 ## 3.3 Format import/export panel (`sequencer-panel`)
 
 ```ts
+type SequencerStatDefinition =
+  | {
+      mode: 'simple';
+      query: { eventIds: string[]; labelIds: string[]; labelColorById?: Record<string, string>; metric: 'count'; labelMatch: 'all' };
+    }
+  | {
+      mode: 'complex';
+      expression: SequencerStatNode;
+      editor?: {
+        terms: Array<{
+          id: string;
+          displayName: string;
+          kind: 'query' | 'constant';
+          query?: { eventIds: string[]; labelIds: string[]; labelColorById?: Record<string, string>; metric: 'count'; labelMatch: 'all' };
+          constantValue?: number;
+        }>;
+        tokens: Array<
+          | { kind: 'term'; termId: string }
+          | { kind: 'operator'; op: '+' | '-' | '*' | '/' }
+          | { kind: 'paren'; value: '(' | ')' }
+        >;
+      };
+    };
+
+type SequencerStatNode =
+  | { kind: 'constant'; value: number }
+  | { kind: 'query'; query: { eventIds: string[]; labelIds: string[]; labelColorById?: Record<string, string>; metric: 'count'; labelMatch: 'all' } }
+  | { kind: 'group'; left: SequencerStatNode; op: '+' | '-' | '*' | '/'; right: SequencerStatNode };
+
 interface SequencerPanelV1 {
   schemaVersion: '1.0.0';
   type: 'sequencer-panel';
@@ -201,31 +231,49 @@ interface SequencerPanelV1 {
         type: 'event';
         id: string;
         name: string;
+        isAnonymized?: boolean;
         layout: { x: number; y: number; w: number; h: number; z: number };
         hotkeyNormalized: string | null;
         deactivateIds: string[];
         activateIds: string[];
-        eventProps: { eventName: string; colorHex: string | null };
+        eventProps: {
+          eventName: string;
+          colorHex: string | null;
+          kind?: 'limited' | 'indefinite';
+          preMs?: number;
+          postMs?: number;
+        };
       }
     | {
         type: 'label';
         id: string;
         name: string;
+        isAnonymized?: boolean;
         layout: { x: number; y: number; w: number; h: number; z: number };
         hotkeyNormalized: string | null;
         deactivateIds: string[];
         activateIds: string[];
-        labelProps: { label: string; colorHex: string | null };
+        labelProps: {
+          label: string;
+          colorHex: string | null;
+          mode?: 'once' | 'indefinite';
+        };
       }
     | {
         type: 'stat';
         id: string;
         name: string;
+        isAnonymized?: boolean;
         layout: { x: number; y: number; w: number; h: number; z: number };
         hotkeyNormalized: string | null;
         deactivateIds: string[];
         activateIds: string[];
-        stat: { statName: string; value: number; colorHex: string | null };
+        stat: {
+          statName: string;
+          value: number;
+          colorHex: string | null;
+          definition?: SequencerStatDefinition;
+        };
       }
   >;
 }
@@ -244,7 +292,7 @@ interface SequencerPanelV1 {
 
 ## 5) Pièges front fréquents
 
-- `PATCH /timelines/:id` et `PATCH /panels/:id` exigent `contentJson`.
+- `PATCH /timelines/:id` exige `contentJson`; `PATCH /panels/:id` accepte un patch partiel de métadonnées/visibilité.
 - Les routes `.../export` renvoient directement le document métier, pas un DTO enveloppé.
 - `POST /api/panels/:id/copy` conserve `clubId` source mais force la copie en `private`.
 - Les listes d’identité (`x-auth-club-ids`, `x-auth-roles`) acceptent CSV **ou** JSON array stringifié.

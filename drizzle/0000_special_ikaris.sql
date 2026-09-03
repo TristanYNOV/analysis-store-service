@@ -1,6 +1,14 @@
-CREATE TYPE "public"."outbox_status" AS ENUM('pending', 'published', 'failed');--> statement-breakpoint
-CREATE TYPE "public"."visibility" AS ENUM('private', 'club', 'public');--> statement-breakpoint
-CREATE TABLE "outbox_events" (
+DO $$ BEGIN
+	CREATE TYPE "public"."outbox_status" AS ENUM('pending', 'published', 'failed');
+EXCEPTION
+	WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+	CREATE TYPE "public"."visibility" AS ENUM('private', 'club', 'public');
+EXCEPTION
+	WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "outbox_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event_type" text NOT NULL,
 	"event_version" integer DEFAULT 1 NOT NULL,
@@ -12,7 +20,7 @@ CREATE TABLE "outbox_events" (
 	"published_at" timestamp with time zone
 );
 --> statement-breakpoint
-CREATE TABLE "panels" (
+CREATE TABLE IF NOT EXISTS "panels" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"owner_user_id" text NOT NULL,
 	"visibility" "visibility" DEFAULT 'private' NOT NULL,
@@ -29,7 +37,7 @@ CREATE TABLE "panels" (
 	CONSTRAINT "panels_club_visibility_consistency" CHECK (("panels"."visibility" <> 'club' OR "panels"."club_id" IS NOT NULL))
 );
 --> statement-breakpoint
-CREATE TABLE "timelines" (
+CREATE TABLE IF NOT EXISTS "timelines" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"owner_user_id" text NOT NULL,
 	"visibility" "visibility" DEFAULT 'private' NOT NULL,
@@ -46,17 +54,17 @@ CREATE TABLE "timelines" (
 	CONSTRAINT "timelines_club_visibility_consistency" CHECK (("timelines"."visibility" <> 'club' OR "timelines"."club_id" IS NOT NULL))
 );
 --> statement-breakpoint
-CREATE INDEX "outbox_events_status_idx" ON "outbox_events" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "outbox_events_event_type_idx" ON "outbox_events" USING btree ("event_type");--> statement-breakpoint
-CREATE INDEX "outbox_events_aggregate_idx" ON "outbox_events" USING btree ("aggregate_type","aggregate_id");--> statement-breakpoint
-CREATE INDEX "outbox_events_created_at_idx" ON "outbox_events" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "panels_owner_user_id_idx" ON "panels" USING btree ("owner_user_id");--> statement-breakpoint
-CREATE INDEX "panels_visibility_idx" ON "panels" USING btree ("visibility");--> statement-breakpoint
-CREATE INDEX "panels_club_id_idx" ON "panels" USING btree ("club_id");--> statement-breakpoint
-CREATE INDEX "panels_created_at_idx" ON "panels" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "panels_updated_at_idx" ON "panels" USING btree ("updated_at");--> statement-breakpoint
-CREATE INDEX "timelines_owner_user_id_idx" ON "timelines" USING btree ("owner_user_id");--> statement-breakpoint
-CREATE INDEX "timelines_visibility_idx" ON "timelines" USING btree ("visibility");--> statement-breakpoint
-CREATE INDEX "timelines_club_id_idx" ON "timelines" USING btree ("club_id");--> statement-breakpoint
-CREATE INDEX "timelines_created_at_idx" ON "timelines" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "timelines_updated_at_idx" ON "timelines" USING btree ("updated_at");
+CREATE INDEX IF NOT EXISTS "outbox_events_status_idx" ON "outbox_events" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "outbox_events_event_type_idx" ON "outbox_events" USING btree ("event_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "outbox_events_aggregate_idx" ON "outbox_events" USING btree ("aggregate_type","aggregate_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "outbox_events_created_at_idx" ON "outbox_events" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "panels_owner_user_id_idx" ON "panels" USING btree ("owner_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "panels_visibility_idx" ON "panels" USING btree ("visibility");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "panels_club_id_idx" ON "panels" USING btree ("club_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "panels_created_at_idx" ON "panels" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "panels_updated_at_idx" ON "panels" USING btree ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "timelines_owner_user_id_idx" ON "timelines" USING btree ("owner_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "timelines_visibility_idx" ON "timelines" USING btree ("visibility");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "timelines_club_id_idx" ON "timelines" USING btree ("club_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "timelines_created_at_idx" ON "timelines" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "timelines_updated_at_idx" ON "timelines" USING btree ("updated_at");

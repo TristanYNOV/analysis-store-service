@@ -54,7 +54,7 @@ cp .env.example .env
 docker compose up -d postgres
 ```
 
-3. Appliquer les migrations:
+3. Appliquer/verifier les migrations:
 
 ```bash
 npm run db:migrate
@@ -107,8 +107,9 @@ Puis:
 curl http://localhost:3001/api/health
 ```
 
-L'image Docker runtime embarque `drizzle.config.ts` et le dossier `drizzle/` pour permettre un usage "one-shot migration" côté infra (sans dépendre du code source monté à l'exécution).
-Les scripts Drizzle utilisent explicitement `--config=drizzle.config.ts` (pas de fallback vers `drizzle.config.json`) et lisent `DATABASE_URL` depuis l'environnement (pas de `.env` embarqué requis dans l'image).
+L'image Docker runtime embarque `drizzle.config.ts`, le dossier `drizzle/` et `scripts/` pour permettre un usage "one-shot migration" côté infra (sans dépendre du code source monté à l'exécution).
+`npm run db:migrate` exécute un runner défensif: réparation idempotente du bootstrap connu si nécessaire, application des migrations Drizzle, puis vérification du schéma attendu. Le script Drizzle brut reste disponible via `npm run db:migrate:raw`.
+Les scripts lisent `DATABASE_URL` depuis l'environnement (pas de `.env` embarqué requis dans l'image).
 
 ## Variables d'environnement
 
@@ -133,6 +134,7 @@ La configuration est validée au démarrage. Si une variable critique est absent
 - `npm run test:e2e`
 - `npm run db:generate`
 - `npm run db:migrate`
+- `npm run db:migrate:raw` pour lancer le migrator Drizzle sans préflight/post-check
 - `npm run db:studio`
 - `npm run db:check`
 
@@ -243,7 +245,7 @@ Tu dois voir au minimum: `timelines`, `panels`, `outbox_events`, et `__drizzle_m
 - `GET /api/panels` (filtré selon règles de lecture)
 - `GET /api/panels/:id` (règles private/public/club, redaction pour lecteur non-owner si contenu anonymisé)
 - `GET /api/panels/:id/export` (mêmes règles que la lecture; owner = complet, non-owner autorisé = redacted)
-- `PATCH /api/panels/:id` (owner only)
+- `PATCH /api/panels/:id` (owner only, patch partiel; permet de repasser un panneau propriétaire en `private`)
 - `DELETE /api/panels/:id` (owner only, hard delete)
 - `POST /api/panels/:id/copy` (lecture autorisée + copie privée)
 

@@ -103,6 +103,17 @@ describe('Timelines and panels ownership/visibility (e2e)', () => {
 
     await request(app.getHttpServer())
       .patch(`/api/panels/${publicId}`)
+      .set(ownerHeaders)
+      .send({ visibility: 'private', clubId: null })
+      .expect(200)
+      .expect((response) => {
+        expect(response.body.visibility).toBe('private');
+      });
+
+    await request(app.getHttpServer()).get(`/api/panels/${publicId}`).set(otherHeaders).expect(403);
+
+    await request(app.getHttpServer())
+      .patch(`/api/panels/${publicId}`)
       .set(otherHeaders)
       .send({ title: 'forbidden update' })
       .expect(403);

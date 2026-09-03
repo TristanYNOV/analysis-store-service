@@ -4,18 +4,70 @@ import {
   SafeParseResult,
   ValidationIssue,
   commonExportMetaSchema,
+  finiteNumberSchema,
   hexColorSchema,
   idSchema,
   layoutSchema,
+  millisecondsIntSchema,
   nameSchema,
   nullableHotkeySchema,
   nonEmptyStringSchema,
   schemaVersionV1Schema,
 } from '../shared/common-import.schemas';
 
+type SequencerEventKind = 'limited' | 'indefinite';
+type SequencerLabelMode = 'once' | 'indefinite';
+type SequencerStatOperator = '+' | '-' | '*' | '/';
+
+export interface SequencerStatQuery {
+  eventIds: string[];
+  labelIds: string[];
+  labelColorById?: Record<string, string>;
+  metric: 'count';
+  labelMatch: 'all';
+}
+
+export type SequencerStatNode =
+  | { kind: 'constant'; value: number }
+  | { kind: 'query'; query: SequencerStatQuery }
+  | {
+      kind: 'group';
+      left: SequencerStatNode;
+      op: SequencerStatOperator;
+      right: SequencerStatNode;
+    };
+
+export interface SequencerStatEditorTerm {
+  id: string;
+  displayName: string;
+  kind: 'query' | 'constant';
+  query?: SequencerStatQuery;
+  constantValue?: number;
+}
+
+export type SequencerStatExpressionToken =
+  | { kind: 'term'; termId: string }
+  | { kind: 'operator'; op: SequencerStatOperator }
+  | { kind: 'paren'; value: '(' | ')' };
+
+export type SequencerStatDefinition =
+  | {
+      mode: 'simple';
+      query: SequencerStatQuery;
+    }
+  | {
+      mode: 'complex';
+      expression: SequencerStatNode;
+      editor?: {
+        terms: SequencerStatEditorTerm[];
+        tokens: SequencerStatExpressionToken[];
+      };
+    };
+
 interface BaseButton {
   id: string;
   name: string;
+  isAnonymized?: boolean;
   layout: {
     x: number;
     y: number;
@@ -33,6 +85,9 @@ export interface EventButton extends BaseButton {
   eventProps: {
     eventName: string;
     colorHex: string | null;
+    kind: SequencerEventKind;
+    preMs: number;
+    postMs: number;
   };
 }
 
@@ -41,6 +96,7 @@ export interface LabelButton extends BaseButton {
   labelProps: {
     label: string;
     colorHex: string | null;
+    mode: SequencerLabelMode;
   };
 }
 
@@ -50,6 +106,7 @@ export interface StatButton extends BaseButton {
     statName: string;
     value: number;
     colorHex: string | null;
+    definition?: SequencerStatDefinition;
   };
 }
 
@@ -117,6 +174,357 @@ function parseNullableHexColor(
   return parsedColor.data;
 }
 
+function parseOptionalBoolean(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): boolean | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== 'boolean') {
+    pushIssue(issues, path, 'Expected boolean.');
+    return undefined;
+  }
+
+  return value;
+}
+
+function parseOptionalMilliseconds(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+  fallback: number,
+): number {
+  if (value === undefined) {
+    return fallback;
+  }
+
+  const parsed = millisecondsIntSchema.safeParse(value);
+  if (!parsed.success) {
+    pushIssue(issues, path, parsed.error.issues[0]?.message ?? 'Invalid milliseconds value.');
+    return fallback;
+  }
+
+  return parsed.data;
+}
+
+function parseEventKind(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerEventKind {
+  if (value === undefined) {
+    return 'limited';
+  }
+
+  if (value !== 'limited' && value !== 'indefinite') {
+    pushIssue(issues, path, 'eventProps.kind must be one of: limited, indefinite.');
+    return 'limited';
+  }
+
+  return value;
+}
+
+function parseLabelMode(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerLabelMode {
+  if (value === undefined) {
+    return 'once';
+  }
+
+  if (value !== 'once' && value !== 'indefinite') {
+    pushIssue(issues, path, 'labelProps.mode must be one of: once, indefinite.');
+    return 'once';
+  }
+
+  return value;
+}
+
+function parseOperator(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerStatOperator {
+  if (value !== '+' && value !== '-' && value !== '*' && value !== '/') {
+    pushIssue(issues, path, 'operator must be one of: +, -, *, /.');
+    return '+';
+  }
+
+  return value;
+}
+
+function parseLabelColorById(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): Record<string, string> | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    pushIssue(issues, path, 'labelColorById must be an object.');
+    return undefined;
+  }
+
+  const parsed: Record<string, string> = {};
+  Object.entries(value).forEach(([key, color]) => {
+    const parsedKey = idSchema.safeParse(key);
+    if (!parsedKey.success) {
+      pushIssue(issues, [...path, key], parsedKey.error.issues[0]?.message ?? 'Invalid label id.');
+      return;
+    }
+
+    const parsedColor = hexColorSchema.safeParse(color);
+    if (!parsedColor.success) {
+      pushIssue(issues, [...path, key], parsedColor.error.issues[0]?.message ?? 'Invalid hex color.');
+      return;
+    }
+
+    parsed[parsedKey.data] = parsedColor.data;
+  });
+
+  return parsed;
+}
+
+function parseStatQuery(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerStatQuery {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    pushIssue(issues, path, 'Stat query must be an object.');
+    return { eventIds: [], labelIds: [], metric: 'count', labelMatch: 'all' };
+  }
+
+  const source = value as Record<string, unknown>;
+  const eventIds = parseStringArray(source.eventIds, [...path, 'eventIds'], issues);
+  const labelIds = parseStringArray(source.labelIds, [...path, 'labelIds'], issues);
+  const labelColorById = parseLabelColorById(source.labelColorById, [...path, 'labelColorById'], issues);
+
+  if (source.metric !== 'count') {
+    pushIssue(issues, [...path, 'metric'], 'metric must be "count".');
+  }
+
+  if (source.labelMatch !== 'all') {
+    pushIssue(issues, [...path, 'labelMatch'], 'labelMatch must be "all".');
+  }
+
+  return {
+    eventIds,
+    labelIds,
+    ...(labelColorById ? { labelColorById } : {}),
+    metric: 'count',
+    labelMatch: 'all',
+  };
+}
+
+function parseStatNode(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerStatNode {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    pushIssue(issues, path, 'Stat expression node must be an object.');
+    return { kind: 'constant', value: 0 };
+  }
+
+  const source = value as Record<string, unknown>;
+
+  if (source.kind === 'constant') {
+    const parsedValue = finiteNumberSchema.safeParse(source.value);
+    if (!parsedValue.success) {
+      pushIssue(issues, [...path, 'value'], parsedValue.error.issues[0]?.message ?? 'Invalid constant value.');
+    }
+
+    return { kind: 'constant', value: parsedValue.success ? parsedValue.data : 0 };
+  }
+
+  if (source.kind === 'query') {
+    return { kind: 'query', query: parseStatQuery(source.query, [...path, 'query'], issues) };
+  }
+
+  if (source.kind === 'group') {
+    return {
+      kind: 'group',
+      left: parseStatNode(source.left, [...path, 'left'], issues),
+      op: parseOperator(source.op, [...path, 'op'], issues),
+      right: parseStatNode(source.right, [...path, 'right'], issues),
+    };
+  }
+
+  pushIssue(issues, [...path, 'kind'], 'Stat expression kind must be one of: constant, query, group.');
+  return { kind: 'constant', value: 0 };
+}
+
+function parseStatEditorTerm(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerStatEditorTerm {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    pushIssue(issues, path, 'Editor term must be an object.');
+    return { id: '', displayName: '', kind: 'constant', constantValue: 0 };
+  }
+
+  const source = value as Record<string, unknown>;
+  const id = idSchema.safeParse(source.id);
+  const displayName = nonEmptyStringSchema.safeParse(source.displayName);
+
+  if (!id.success) {
+    pushIssue(issues, [...path, 'id'], id.error.issues[0]?.message ?? 'Invalid term id.');
+  }
+
+  if (!displayName.success) {
+    pushIssue(issues, [...path, 'displayName'], displayName.error.issues[0]?.message ?? 'Invalid displayName.');
+  }
+
+  if (source.kind === 'query') {
+    return {
+      id: id.success ? id.data : '',
+      displayName: displayName.success ? displayName.data : '',
+      kind: 'query',
+      query: parseStatQuery(source.query, [...path, 'query'], issues),
+    };
+  }
+
+  if (source.kind === 'constant') {
+    const constantValue = finiteNumberSchema.safeParse(source.constantValue);
+    if (!constantValue.success) {
+      pushIssue(
+        issues,
+        [...path, 'constantValue'],
+        constantValue.error.issues[0]?.message ?? 'Invalid constantValue.',
+      );
+    }
+
+    return {
+      id: id.success ? id.data : '',
+      displayName: displayName.success ? displayName.data : '',
+      kind: 'constant',
+      constantValue: constantValue.success ? constantValue.data : 0,
+    };
+  }
+
+  pushIssue(issues, [...path, 'kind'], 'Editor term kind must be one of: query, constant.');
+  return {
+    id: id.success ? id.data : '',
+    displayName: displayName.success ? displayName.data : '',
+    kind: 'constant',
+    constantValue: 0,
+  };
+}
+
+function parseStatExpressionToken(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerStatExpressionToken {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    pushIssue(issues, path, 'Expression token must be an object.');
+    return { kind: 'operator', op: '+' };
+  }
+
+  const source = value as Record<string, unknown>;
+
+  if (source.kind === 'term') {
+    const termId = idSchema.safeParse(source.termId);
+    if (!termId.success) {
+      pushIssue(issues, [...path, 'termId'], termId.error.issues[0]?.message ?? 'Invalid termId.');
+    }
+
+    return { kind: 'term', termId: termId.success ? termId.data : '' };
+  }
+
+  if (source.kind === 'operator') {
+    return { kind: 'operator', op: parseOperator(source.op, [...path, 'op'], issues) };
+  }
+
+  if (source.kind === 'paren') {
+    if (source.value !== '(' && source.value !== ')') {
+      pushIssue(issues, [...path, 'value'], 'Paren token value must be "(" or ")".');
+    }
+
+    return { kind: 'paren', value: source.value === ')' ? ')' : '(' };
+  }
+
+  pushIssue(issues, [...path, 'kind'], 'Expression token kind must be one of: term, operator, paren.');
+  return { kind: 'operator', op: '+' };
+}
+
+function parseStatEditor(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): { terms: SequencerStatEditorTerm[]; tokens: SequencerStatExpressionToken[] } | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    pushIssue(issues, path, 'Stat editor must be an object.');
+    return undefined;
+  }
+
+  const source = value as Record<string, unknown>;
+
+  if (!Array.isArray(source.terms)) {
+    pushIssue(issues, [...path, 'terms'], 'editor.terms must be an array.');
+  }
+
+  if (!Array.isArray(source.tokens)) {
+    pushIssue(issues, [...path, 'tokens'], 'editor.tokens must be an array.');
+  }
+
+  const terms = Array.isArray(source.terms)
+    ? source.terms.map((term, termIndex) => parseStatEditorTerm(term, [...path, 'terms', termIndex], issues))
+    : [];
+
+  const tokens = Array.isArray(source.tokens)
+    ? source.tokens.map((token, tokenIndex) => parseStatExpressionToken(token, [...path, 'tokens', tokenIndex], issues))
+    : [];
+
+  return { terms, tokens };
+}
+
+function parseStatDefinition(
+  value: unknown,
+  path: Array<string | number>,
+  issues: ValidationIssue[],
+): SequencerStatDefinition | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    pushIssue(issues, path, 'Stat definition must be an object.');
+    return undefined;
+  }
+
+  const source = value as Record<string, unknown>;
+
+  if (source.mode === 'simple') {
+    return { mode: 'simple', query: parseStatQuery(source.query, [...path, 'query'], issues) };
+  }
+
+  if (source.mode === 'complex') {
+    const editor = parseStatEditor(source.editor, [...path, 'editor'], issues);
+
+    return {
+      mode: 'complex',
+      expression: parseStatNode(source.expression, [...path, 'expression'], issues),
+      ...(editor ? { editor } : {}),
+    };
+  }
+
+  pushIssue(issues, [...path, 'mode'], 'Stat definition mode must be one of: simple, complex.');
+  return undefined;
+}
+
 function parseCommonButtonFields(
   source: Record<string, unknown>,
   index: number,
@@ -126,6 +534,7 @@ function parseCommonButtonFields(
   const nameResult = nameSchema.safeParse(source.name);
   const layoutResult = layoutSchema.safeParse(source.layout);
   const hotkeyResult = nullableHotkeySchema.safeParse(source.hotkeyNormalized);
+  const isAnonymized = parseOptionalBoolean(source.isAnonymized, ['btnList', index, 'isAnonymized'], issues);
 
   if (!idResult.success) {
     pushIssue(issues, ['btnList', index, 'id'], idResult.error.issues[0]?.message ?? 'Invalid id.');
@@ -163,10 +572,11 @@ function parseCommonButtonFields(
           w: 0,
           h: 0,
           z: 0,
-        },
+    },
     hotkeyNormalized: hotkeyResult.success ? hotkeyResult.data : null,
     deactivateIds,
     activateIds,
+    ...(isAnonymized === undefined ? {} : { isAnonymized }),
   };
 }
 
@@ -195,6 +605,9 @@ function parseButton(source: unknown, index: number, issues: ValidationIssue[]):
     const eventProps = record.eventProps as Record<string, unknown>;
     const eventName = nonEmptyStringSchema.safeParse(eventProps.eventName);
     const colorHex = parseNullableHexColor(eventProps.colorHex, ['btnList', index, 'eventProps', 'colorHex'], issues);
+    const kind = parseEventKind(eventProps.kind, ['btnList', index, 'eventProps', 'kind'], issues);
+    const preMs = parseOptionalMilliseconds(eventProps.preMs, ['btnList', index, 'eventProps', 'preMs'], issues, 0);
+    const postMs = parseOptionalMilliseconds(eventProps.postMs, ['btnList', index, 'eventProps', 'postMs'], issues, 0);
 
     if (!eventName.success) {
       pushIssue(
@@ -210,6 +623,9 @@ function parseButton(source: unknown, index: number, issues: ValidationIssue[]):
       eventProps: {
         eventName: eventName.success ? eventName.data : '',
         colorHex,
+        kind,
+        preMs,
+        postMs,
       },
     };
   }
@@ -223,6 +639,7 @@ function parseButton(source: unknown, index: number, issues: ValidationIssue[]):
     const labelProps = record.labelProps as Record<string, unknown>;
     const label = nonEmptyStringSchema.safeParse(labelProps.label);
     const colorHex = parseNullableHexColor(labelProps.colorHex, ['btnList', index, 'labelProps', 'colorHex'], issues);
+    const mode = parseLabelMode(labelProps.mode, ['btnList', index, 'labelProps', 'mode'], issues);
 
     if (!label.success) {
       pushIssue(
@@ -238,6 +655,7 @@ function parseButton(source: unknown, index: number, issues: ValidationIssue[]):
       labelProps: {
         label: label.success ? label.data : '',
         colorHex,
+        mode,
       },
     };
   }
@@ -251,6 +669,7 @@ function parseButton(source: unknown, index: number, issues: ValidationIssue[]):
   const statName = nonEmptyStringSchema.safeParse(statProps.statName);
   const value = Number(statProps.value);
   const colorHex = parseNullableHexColor(statProps.colorHex, ['btnList', index, 'stat', 'colorHex'], issues);
+  const definition = parseStatDefinition(statProps.definition, ['btnList', index, 'stat', 'definition'], issues);
 
   if (!statName.success) {
     pushIssue(
@@ -271,6 +690,7 @@ function parseButton(source: unknown, index: number, issues: ValidationIssue[]):
       statName: statName.success ? statName.data : '',
       value: Number.isFinite(value) ? value : 0,
       colorHex,
+      ...(definition ? { definition } : {}),
     },
   };
 }

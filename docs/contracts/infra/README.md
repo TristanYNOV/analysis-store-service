@@ -105,7 +105,7 @@ services:
         condition: service_healthy
 ```
 
-Ce service one-shot reste orchestré côté `infra` (pas dans ce repo).
+Ce service one-shot reste orchestré côté `infra` (pas dans ce repo). `db:migrate` applique le runner défensif de l'image: bootstrap idempotent si nécessaire, migrations Drizzle, puis vérification du schéma attendu avant retour succès.
 
 ## 6) Pull GHCR privé (si package non public)
 

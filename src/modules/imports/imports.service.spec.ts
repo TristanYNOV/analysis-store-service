@@ -51,7 +51,7 @@ describe('ImportsService', () => {
         id: 'btn-evt',
         name: 'Goal',
         type: 'event',
-        eventProps: { eventName: 'Goal', colorHex: '#00FFAA' },
+        eventProps: { eventName: 'Goal', colorHex: '#00FFAA', kind: 'indefinite', preMs: 1000, postMs: 2000 },
         layout: { x: 0, y: 0, w: 2, h: 1, z: 0 },
         hotkeyNormalized: null,
         deactivateIds: [],
@@ -61,7 +61,8 @@ describe('ImportsService', () => {
         id: 'btn-label',
         name: 'Phase',
         type: 'label',
-        labelProps: { label: 'Phase 1', colorHex: '#112233' },
+        isAnonymized: true,
+        labelProps: { label: 'Phase 1', colorHex: '#112233', mode: 'indefinite' },
         layout: { x: 2, y: 0, w: 2, h: 1, z: 1 },
         hotkeyNormalized: null,
         deactivateIds: ['btn-evt'],
@@ -71,7 +72,21 @@ describe('ImportsService', () => {
         id: 'btn-stat',
         name: 'Possession',
         type: 'stat',
-        stat: { statName: 'possession', value: 55, colorHex: '#445566' },
+        stat: {
+          statName: 'possession',
+          value: 55,
+          colorHex: '#445566',
+          definition: {
+            mode: 'simple',
+            query: {
+              eventIds: ['btn-evt'],
+              labelIds: ['btn-label'],
+              labelColorById: { 'btn-label': '#112233' },
+              metric: 'count',
+              labelMatch: 'all',
+            },
+          },
+        },
         layout: { x: 4, y: 0, w: 2, h: 1, z: 2 },
         hotkeyNormalized: null,
         deactivateIds: [],
@@ -112,6 +127,25 @@ describe('ImportsService', () => {
         statButtonCount: 1,
       },
       errors: [],
+    });
+    expect(result.normalizedPayload?.btnList[0]).toMatchObject({
+      eventProps: { kind: 'indefinite', preMs: 1000, postMs: 2000 },
+    });
+    expect(result.normalizedPayload?.btnList[1]).toMatchObject({
+      isAnonymized: true,
+      labelProps: { mode: 'indefinite', colorHex: '#112233' },
+    });
+    expect(result.normalizedPayload?.btnList[2]).toMatchObject({
+      stat: {
+        definition: {
+          mode: 'simple',
+          query: {
+            eventIds: ['btn-evt'],
+            labelIds: ['btn-label'],
+            labelColorById: { 'btn-label': '#112233' },
+          },
+        },
+      },
     });
   });
 
